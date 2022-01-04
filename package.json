@@ -1,0 +1,24 @@
+{
+  "name": "navrhove-vzory-v",
+  "version": "1.0.0",
+  "description": "Website about design patterns in JavaScript.",
+  "main": "index.js",
+  "scripts": {
+    "compile:less": "lessc ./less/main.less ./media/css/style.css",
+    "nodemon:compile:less": "nodemon -e less -x \"npm run compile:less\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jirkasa/navrhove-vzory-v-js.git"
+  },
+  "author": "Jiří Satora",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Jirkasa/navrhove-vzory-v-js/issues"
+  },
+  "homepage": "https://github.com/Jirkasa/navrhove-vzory-v-js#readme",
+  "devDependencies": {
+    "less": "^4.1.2",
+    "nodemon": "^2.0.15"
+  }
+}
