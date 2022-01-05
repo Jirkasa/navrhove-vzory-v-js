@@ -1,0 +1,52 @@
+.header {
+    background-color: @colors[secondary];
+
+    padding: 2rem 3rem;
+
+    &__content {
+        display: flex;
+        justify-content: space-between;
+        align-items: stretch;
+
+        width: 100%;
+        max-width: @grid-width;
+        margin: 0 auto;
+    }
+
+    &__title {
+        font-size: 3.5rem;
+
+        color: @colors[white];
+
+        span {
+            color: lighten(@colors[grey], 30%);
+        }
+    }
+
+    &__nav {
+
+        ul {
+            display: flex;
+            align-items: center;
+
+            list-style: none;
+
+            height: 100%;
+        }
+
+        li:not(:last-child) {
+            margin-right: 4rem;
+        }
+    }
+
+    &__nav-link {
+        &:link, &:visited {
+            font-size: 1.3rem;
+            font-weight: 700;
+
+            text-transform: uppercase;
+            text-decoration: none;
+            color: @colors[white];
+        }
+    }
+}
