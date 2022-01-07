@@ -30,7 +30,208 @@
                 <div class="article-page__main-side">
                     <h1 class="heading-primary u-mb-small">Builder</h1>
                     <hr class="horizontal-rule u-mb-small">
-                    <p class="paragraph u-mb-small"></p>
+                    <p class="paragraph u-mb-medium">V této části se podíváme na návrhový vzor jménem Builder. Jedná se o návrhový vzor, který slouží pro vytváření objektů.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Proč Builder použít</h2>
+                    <p class="paragraph u-mb-small">Některé objekty jsou jednoduché a můžeme je vytvořit jednoduchým zavoláním konstruktoru. Pokud je ale tvorba objektu náročnější, tak si pro jeho vytváření můžeme vytvořit Builder. Použitím tohoto návrhového vzoru se vyhneme tomu, že by náš konstruktor obsahoval příliš mnoho parametrů ve kterých bychom se mohli začít ztrácet.</p>
+                    <p class="paragraph u-mb-medium">Builder představuje třídu, která obsahuje různé metody, které při vytváření objektu můžeme použít. Namísto předávání parametrů do konstruktoru tedy používáme tyto metody. Až jsme s tvorbou objektu hotovi, tak většinou zavoláme nějakou metodu Builderu, která nám vytvořený objekt vrátí.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Příklad - Tvorba HTML pomocí Builderu</h2>
+                    <p class="paragraph u-mb-small">První příklad použití Builderu, který si ukážeme, se nebude týkat přímo tvorby objektu. Budeme pomocí Builderu vytvářet HTML kód. Nejdříve si ale ukážeme, jak bychom mohli HTML kód vytvářet bez použití Builderu.</p>
+                    <pre class="code-box u-mb-small"><code>// VYTVOŘENÍ p ELEMENTU
+let text = "Toto je odstavec.";
+let html = [];
+html.push("&lt;p&gt;");
+html.push(text);
+html.push("&lt;/p&gt;");
+// vypsání html kódu do konzole
+console.log(html.join(""));
+
+// VYTVOŘENÍ ul ELEMENTU
+const polozky = ["návrhový", "vzor", "builder"];
+html = [];
+html.push("&lt;ul&gt;\n");
+for (let polozka of polozky)
+    html.push(`    &lt;li&gt;${polozka}&lt;/li&gt;\n`);
+html.push("&lt;/ul&gt;");
+// vypsání html kódu do konzole
+console.log(html.join(""));</code></pre>
+                    <p class="paragraph u-mb-small">Určitě uznáte, že předchozí ukázka tvorby HTML kódu nevypadá vůbec dobře. Takto bychom HTML asi generovat nechtěli. Následující ukázka ukazuje, jak můžeme generovat HTML pomocí Builderu.</p>
+                    <pre class="code-box u-mb-small"><code>class Tag {
+    static VELIKOST_ODSAZENI = 2;
+
+    constructor(nazev="", text="") {
+        this.nazev = nazev;
+        this.text = text;
+        this.potomci = [];
+    }
+
+    // implementace pro získání HTML kódu tagu
+    toStringImpl(odsazeni) {
+        const html = [];
+        const mezery = " ".repeat(odsazeni * Tag.VELIKOST_ODSAZENI);
+
+        // počáteční tag
+        html.push(`${mezery}&lt;${this.nazev}&gt;\n`);
+        // text tagu
+        if (this.text.length &gt; 0) {
+            html.push(" ".repeat(Tag.VELIKOST_ODSAZENI * (odsazeni+1)));
+            html.push(this.text);
+            html.push('\n');
+        }
+        // potomci tagu
+        for (let potomek of this.potomci)
+            html.push(potomek.toStringImpl(odsazeni+1));
+        // konečný tag
+        html.push(`${mezery}&lt;/${this.nazev}&gt;\n`);
+
+        return html.join("");
+    }
+
+    // metoda pro získání HTML kódu tagu
+    toString() {
+        return this.toStringImpl(0);
+    }
+
+    // pomocí této statické metody můžeme získat nový Builder (nemusíme si jej tedy vytvářet sami)
+    static vytvor(nazev) {
+        return new HTMLBuilder(nazev);
+    }
+}
+
+// Builder pro tvorbu HTML (nebo vlastně Tag objektu)
+class HTMLBuilder {
+    // při vytváření Builderu předáváme, jaký tag budeme vytvářet
+    constructor(rootNazev) {
+        this.root = new Tag(rootNazev);
+        this.rootNazev = rootNazev;
+    }
+
+    // pomocí této metody můžeme vytvářený objekt (this.root) nastavovat
+    pridejPotomka(nazev, text) {
+        // vytvářenému objektu se přidá nový potomek
+        const potomek = new Tag(nazev, text);
+        this.root.potomci.push(potomek);
+        // po provedení metody se builder vrací, takže můžeme řetězit další metody
+        return this;
+    }
+
+    // po nakonfigurování vytvářeného objektu můžeme zavolat tuto metodu a tím objekt získáme
+    postav() {
+        return this.root;
+    }
+}
+
+// vytvoření ul elementu pomocí Builderu
+// - třída Tag obsahuje statickou metodu vytvor, která vrací nový HTMLBuilder (nemusíme si jej vytvářet sami)
+const list = Tag.vytvor("ul")
+    .pridejPotomka("li", "návrhový")
+    .pridejPotomka("li", "vzor")
+    .pridejPotomka("li", "builder")
+    .postav(); // po konfiguraci objektu zavoláme metodu postav, která vytvořený objekt vrátí
+
+// vypsání vytvořeného HTML kódu do konzole
+console.log(list.toString());</code></pre>
+                    <p class="paragraph u-mb-medium">Jak jste viděli v ukázce, s Builderem se HTML kód tvoří mnohem snadněji.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Příklad - Vytvoření Builderu obsahující více Builderů</h2>
+                    <p class="paragraph u-mb-small">Občas může náš Builder být trochu složitější. V takovém případě si jej klidně můžeme rozdělit na více částí a v každé části stavět jinou část objektu. Jak to můžeme udělat ukazuje následující ukázka. V ukázce se nachází Builder pro vytváření objektů typu Clovek, který obsahuje gettery pro získání jiných Builderů, které slouží k postavení specifických částí objektu.</p>
+                    <pre class="code-box u-mb-medium"><code>class Clovek {
+    constructor() {
+        this.jmeno = "";
+
+        // informace o adrese
+        this.adresa = this.postovniCislo = this.mesto = "";
+
+        // informace o zaměstnaní
+        this.jmenoSpolecnosti = this.pozice = "";
+        this.rocniPrijem = 0;
+    }
+
+    toString() {
+        return `${this.jmeno} žije v ${this.adresa}, ${this.postovniCislo}, ${this.mesto}\n` +
+            `a pracuje v ${this.jmenoSpolecnosti} jako ${this.pozice} s ročním příjmem ${this.rocniPrijem}.`;
+    }
+}
+
+// Builder pro objekty typu Clovek
+class ClovekBuilder {
+    constructor(clovek=new Clovek()) {
+        this.clovek = clovek;
+    }
+
+    jmenujeSe(jmeno) {
+        this.clovek.jmeno = jmeno;
+        return this;
+    }
+
+    // getter k získání Builderu pro nastavení adresy člověka
+    get zije() {
+        return new ClovekAdresaBuilder(this.clovek);
+    }
+
+    // getter k získání Builderu pro nastavení zaměstnání člověka
+    get pracuje() {
+        return new ClovekZamestnaniBuilder(this.clovek);
+    }
+
+    // pomocí této metody získáme vytvořený objekt
+    postav() {
+        return this.clovek;
+    }
+}
+
+// Builder pro vlastnosti týkající se adresy objektu typu Clovek
+class ClovekAdresaBuilder extends ClovekBuilder { // dědí se od třídy ClovekBuilder, takže se zdědí její metody
+    constructor(clovek) {
+        super(clovek);
+    }
+
+    v(adresa) {
+        this.clovek.adresa = adresa;
+        return this;
+    }
+
+    sPSC(postovniCislo) {
+        this.clovek.postovniCislo = postovniCislo;
+        return this;
+    }
+
+    veMeste(mesto) {
+        this.clovek.mesto = mesto;
+        return this;
+    }
+}
+
+// Builder pro vlastnosti týkající se zaměstnání objektu typu Clovek
+class ClovekZamestnaniBuilder extends ClovekBuilder { // dědí se od třídy ClovekBuilder, takže se zdědí její metody
+    constructor(clovek) {
+        super(clovek);
+    }
+
+    v(jmenoSpolecnosti) {
+        this.clovek.jmenoSpolecnosti = jmenoSpolecnosti;
+        return this;
+    }
+
+    jako(pozice) {
+        this.clovek.pozice = pozice;
+        return this;
+    }
+
+    sPrijmem(rocniPrijem) {
+        this.clovek.rocniPrijem = rocniPrijem;
+        return this;
+    }
+}
+
+
+// vytvoření Builderu
+const cb = new ClovekBuilder();
+// vytvoření objektu typu Clovek s použitím Builderu
+const karel = cb.jmenujeSe("Karel")
+    .zije.v("12 Londýnská").veMeste("New York").sPSC("123 45")
+    .pracuje.v("Koogle").jako("programátor").sPrijmem(420000)
+    .postav();
+
+console.log(karel.toString());</code></pre>
                     <div class="u-text-center">
                         <a href="#" class="button-primary">pokračovat na další část</a>
                     </div>
