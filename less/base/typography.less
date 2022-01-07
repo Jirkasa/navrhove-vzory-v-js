@@ -3,3 +3,59 @@
 body {
     font-family: 'Raleway', sans-serif;
 }
+
+.heading-primary {
+    font-size: 3rem;
+    font-weight: 600;
+
+    text-transform: uppercase;
+    color: @colors[dark-grey];
+}
+
+.heading-secondary {
+    font-size: 2.5rem;
+    font-weight: 600;
+
+    text-transform: uppercase;
+    color: @colors[dark-grey];
+}
+
+.heading-tertiary {
+    font-size: 2.2rem;
+    font-weight: normal;
+
+    text-transform: uppercase;
+    color: @colors[dark-grey];
+}
+
+.paragraph {
+    font-size: 1.6rem;
+
+    line-height: 1.4;
+
+    color: darken(@colors[grey], 10%);
+}
+
+a.anchor {
+    &:link, &:visited {
+        color: @colors[primary];
+
+        text-decoration: none;
+    }
+}
+
+.unordered-list {
+    font-size: 1.6rem;
+    list-style-position: inside;
+
+    li {
+        margin-bottom: .5rem;
+    }
+
+    &--highlight-first-letter {
+        li::first-letter {
+            color: @colors[primary];
+            font-weight: bold;
+        }
+    }
+}

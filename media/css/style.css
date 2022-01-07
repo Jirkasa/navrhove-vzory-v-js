@@ -42,6 +42,197 @@ body {
 body {
   font-family: 'Raleway', sans-serif;
 }
+.heading-primary {
+  font-size: 3rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #2d3033;
+}
+.heading-secondary {
+  font-size: 2.5rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #2d3033;
+}
+.heading-tertiary {
+  font-size: 2.2rem;
+  font-weight: normal;
+  text-transform: uppercase;
+  color: #2d3033;
+}
+.paragraph {
+  font-size: 1.6rem;
+  line-height: 1.4;
+  color: #54595e;
+}
+a.anchor:link,
+a.anchor:visited {
+  color: #e84545;
+  text-decoration: none;
+}
+.unordered-list {
+  font-size: 1.6rem;
+  list-style-position: inside;
+}
+.unordered-list li {
+  margin-bottom: 0.5rem;
+}
+.unordered-list--highlight-first-letter li::first-letter {
+  color: #e84545;
+  font-weight: bold;
+}
+.u-mb-tiny {
+  margin-bottom: 0.5rem !important;
+}
+.u-mb-small {
+  margin-bottom: 1rem !important;
+}
+.u-mb-medium {
+  margin-bottom: 2rem !important;
+}
+.u-mb-large {
+  margin-bottom: 3rem !important;
+}
+.u-text-center {
+  text-align: center !important;
+}
+pre code.hljs {
+  display: block;
+  overflow-x: auto;
+  padding: 1rem;
+  height: 100%;
+}
+pre code.hljs::-webkit-scrollbar {
+  width: 1.3rem;
+  height: 1.3rem;
+}
+pre code.hljs::-webkit-scrollbar-track {
+  background: #9a1313;
+}
+pre code.hljs::-webkit-scrollbar-thumb {
+  background: #e84545;
+  border-radius: 1px;
+  border: 2px solid #ee7272;
+}
+pre code.hljs::-webkit-scrollbar-thumb:hover {
+  background: #e52e2e;
+}
+code.hljs {
+  padding: 0.3rem 0.5rem;
+  font-size: 1.6rem;
+  line-height: 1.84rem;
+}
+/*!
+    Theme: Agate
+    Author: (c) Taufik Nurrohman <hi@taufik-nurrohman.com>
+    Maintainer: @taufik-nurrohman
+    Updated: 2021-04-24
+    #333
+    #62c8f3
+    #7bd694
+    #888
+    #a2fca2
+    #ade5fc
+    #b8d8a2
+    #c6b4f0
+    #d36363
+    #fc9b9b
+    #fcc28c
+    #ffa
+    #fff
+ */
+.hljs {
+  background: #333;
+  color: #fff;
+  border-radius: 0.5rem;
+}
+.hljs-doctag,
+.hljs-meta-keyword,
+.hljs-name,
+.hljs-strong {
+  font-weight: 700;
+}
+.hljs-code,
+.hljs-emphasis {
+  font-style: italic;
+}
+.hljs-section,
+.hljs-tag {
+  color: #62c8f3;
+}
+.hljs-selector-class,
+.hljs-selector-id,
+.hljs-template-variable,
+.hljs-variable {
+  color: #ade5fc;
+}
+.hljs-meta-string,
+.hljs-string {
+  color: #a2fca2;
+}
+.hljs-attr,
+.hljs-quote,
+.hljs-selector-attr {
+  color: #7bd694;
+}
+.hljs-tag .hljs-attr {
+  color: inherit;
+}
+.hljs-attribute,
+.hljs-title,
+.hljs-type {
+  color: #ffa;
+}
+.hljs-number,
+.hljs-symbol {
+  color: #d36363;
+}
+.hljs-bullet,
+.hljs-template-tag {
+  color: #b8d8a2;
+}
+.hljs-built_in,
+.hljs-keyword,
+.hljs-literal,
+.hljs-selector-tag {
+  color: #fcc28c;
+}
+.hljs-code,
+.hljs-comment,
+.hljs-formula {
+  color: #888;
+}
+.hljs-link,
+.hljs-regexp,
+.hljs-selector-pseudo {
+  color: #c6b4f0;
+}
+.hljs-meta {
+  color: #fc9b9b;
+}
+.hljs-deletion {
+  background: #fc9b9b;
+  color: #333;
+}
+.hljs-addition {
+  background: #a2fca2;
+  color: #333;
+}
+.hljs-subst {
+  color: #fff;
+}
+.hljs a {
+  color: inherit;
+}
+.hljs a:focus,
+.hljs a:hover {
+  color: inherit;
+  text-decoration: underline;
+}
+.hljs mark {
+  background: #555;
+  color: inherit;
+}
 .page {
   width: 100%;
   max-width: 180rem;
@@ -65,7 +256,7 @@ body {
   color: #fff;
 }
 .header__title span {
-  color: #b8b9c5;
+  color: #bbbfc3;
 }
 .header__nav ul {
   display: flex;
@@ -83,4 +274,51 @@ body {
   text-transform: uppercase;
   text-decoration: none;
   color: #fff;
+}
+.horizontal-rule {
+  width: 100%;
+  height: 0.2rem;
+  border: none;
+  background-color: #e84545;
+}
+.code-box {
+  font-size: 1.6rem;
+  padding: 0;
+}
+.code-box .hljs {
+  border: 0.3rem solid #f3a0a0;
+}
+.button-primary:link,
+.button-primary:visited {
+  display: inline-block;
+  font-size: 1.5rem;
+  text-transform: uppercase;
+  text-decoration: none;
+  background-color: #e84545;
+  color: #fff;
+  transition: all 0.1s;
+  padding: 1.5rem 6rem;
+}
+.button-primary:hover {
+  background-color: #de1c1c;
+}
+.button-primary:active {
+  background-color: #c81919;
+}
+.article-page {
+  padding: 4rem 3rem;
+}
+.article-page__content {
+  width: 100%;
+  max-width: 120rem;
+  margin: 0 auto;
+  display: flex;
+}
+.article-page__main-side {
+  flex: 1;
+  overflow-x: hidden;
+}
+.article-page__lateral-side {
+  flex: 0 0 30rem;
+  padding-left: 3rem;
 }

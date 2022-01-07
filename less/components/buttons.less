@@ -1,0 +1,23 @@
+.button-primary {
+    &:link, &:visited {
+        display: inline-block;
+        font-size: 1.5rem;
+
+        text-transform: uppercase;
+        text-decoration: none;
+        background-color: @colors[primary];
+        color: @colors[white];
+
+        transition: all .1s;
+
+        padding: 1.5rem 6rem;
+    }
+
+    &:hover {
+        background-color: darken(@colors[primary], 10%);
+    }
+
+    &:active {
+        background-color: darken(@colors[primary], 15%);
+    }
+}

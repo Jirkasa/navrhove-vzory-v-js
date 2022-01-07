@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=yes maximum-scale=2.2 minimum-scale=1.0">
+    <title>Návrhové vzory v JS - Návrhové principy</title>
+
+    <script src="../media/js/libraries/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+
+    <link rel="stylesheet" href="../media/css/style.css">
+</head>
+<body>
+    <div class="page">
+        <header class="header">
+            <div class="header__content">
+                <h2 class="header__title"><span>Návrhové vzory</span> v JS</h2>
+                <nav class="header__nav">
+                    <ul>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+        <div class="article-page">
+            <div class="article-page__content">
+                <div class="article-page__main-side">
+                    <h1 class="heading-primary u-mb-small">Návrhové principy</h1>
+                    <hr class="horizontal-rule u-mb-small">
+                    <p class="paragraph u-mb-small">V první části tohoto tutoriálu o návrhových vzorech v JavaScriptu se dozvíte o různých principech pro návrh softwaru. Na konkrétní návrhové vzory se zaměřují až další části.</p>
+                    <p class="paragraph u-mb-medium">Návrhové principy jsou pravidla, která nám pomáhají lépe navrhovat software. Je jich více a nejdůležitější jsou pravděpodobně SOLID návrhové principy.</p>
+                    <h2 class="heading-secondary u-mb-tiny">SOLID</h2>
+                    <p class="paragraph u-mb-small">Návrhové principy SOLID představují 5 principů pro objektově orientovaný vývoj softwaru, které byly představeny <a href="https://en.wikipedia.org/wiki/Robert_C._Martin" target="_blank" class="anchor">Robertem C. Martinem</a>. Název SOLID je akronymem pro tyto klíčové návrhové principy:</p>
+                    <ul class="unordered-list unordered-list--highlight-first-letter u-mb-medium">
+                        <li>Single Responsibility Principle (princip jedné odpovědnosti)</li>
+                        <li>Open-Closed Principle (princip otevřenosti a uzavřenosti)</li>
+                        <li>Liskov Substitution Principle (Liskovové princip zaměnitelnosti)</li>
+                        <li>Interface Segregation Principle (princip oddělení rozhraní)</li>
+                        <li>Dependency Inversion Principle (princip obrácení závislostí)</li>
+                    </ul>
+                    <h3 class="heading-tertiary u-mb-tiny">Princip jedné odpovědnosti</h3>
+                    <p class="paragraph u-mb-small">Tento princip je o tom, že by každá třída měla mít jen jednu odpovědnost. Dodržování tohoto pravidla znamená, že by naše třídy měly dělat jen jednu věc a zodpovídat pouze za jednu část funkčnosti softwaru.</p>
+                    <p class="paragraph u-mb-small">Následující ukázka kódu ukazuje třídu, která reprezentuje uživatele. Ukládá jeho jméno, příjmení a email. S těmito údaji potom pracuje ve svých metodách. Email se navíc ještě ověřuje.</p>
+                    <pre class="code-box u-mb-small"><code>class Uzivatel {
+    constructor(jmeno, prijmeni, email) {
+        this.jmeno = jmeno;
+        this.prijmeni = prijmeni;
+
+        // pro email bychom mohli vytvořit samostatnou třídu,
+        // než kontrolovat jeho správnost přímo zde
+        if (this.overEmail(email)) {
+            this.email = email;
+        } else {
+            throw new Error("Neplatný email.");
+        }
+    }
+
+    // metoda pro ověření emailu
+    overEmail(email) {
+        const regEx = /^(([^&lt;&gt;()[\]\\.,;:\s@"]+(\.[^&lt;&gt;()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return regEx.test(email);
+    }
+
+    pozdrav() {
+        console.log("Ahoj");
+    }
+
+    predstavSe() {
+        console.log(`Zdravím, já jsem ${this.jmeno} ${this.prijmeni}.`);
+    }
+}
+
+const uzivatel = new Uzivatel("Karel", "Omáčka", "omacka123@gmail.com");
+uzivatel.predstavSe();
+uzivatel.pozdrav();</code></pre>
+                    <p class="paragraph u-mb-small">Třídu Uzivatel z předchozí ukázky můžeme vylepšit tím, že přesuneme odpovědnost pro ověřování emailu do samostatné třídy. Díky tomu bude odpovědností třídy Uzivatel jen reprezentace uživatele, bez ověřování jeho emailu.</p>
+                    <pre class="code-box u-mb-medium"><code>class Uzivatel {
+    constructor(jmeno, prijmeni, email) {
+        this.jmeno = jmeno;
+        this.prijmeni = prijmeni;
+        this.email = email;
+    }
+
+    pozdrav() {
+        console.log("Ahoj");
+    }
+
+    predstavSe() {
+        console.log(`Zdravím, já jsem ${this.jmeno} ${this.prijmeni}.`);
+    }
+}
+
+// pro Email je definována samostatná třída
+class Email {
+    constructor(email) {
+        // email se ověřuje zde
+        if (this.overEmail(email)) {
+            this.email = email;
+        } else {
+            throw new Error("Neplatný email.");
+        }
+    }
+
+    // metoda pro ověření emailu
+    overEmail(email) {
+        const regEx = /^(([^&lt;&gt;()[\]\\.,;:\s@"]+(\.[^&lt;&gt;()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return regEx.test(email);
+    }
+
+    toString() {
+        return this.email;
+    }
+}
+
+const uzivatel = new Uzivatel("Karel", "Omáčka", new Email("omacka123@gmail.com"));
+uzivatel.predstavSe();
+uzivatel.pozdrav();</code></pre>
+                    <h3 class="heading-tertiary u-mb-tiny">Princip otevřenosti a uzavřenosti</h3>
+                    <p class="paragraph u-mb-small">Tento princip se týká toho, že by třídy měly být otevřeny pro rozšiřování, ale uzavřené pro změny. Pokud tedy chceme přidat nějakou novou funkcionalitu do již dobře odladěné třídy, tak bychom ji namísto její modifikace měli jen rozšířit. Modifikací třídy bychom totiž mohli způsobit problémy v částech aplikace, kde se třída již používá.</p>
+                    <p class="paragraph u-mb-small">Následující ukázka kódu ukazuje třídu ProduktFilter, která slouží k filtrování polí s produkty. Třída obsahuje metody, které nám umožňují produkty filtrovat podle barvy nebo velikosti.</p>
+                    <pre class="code-box u-mb-small"><code>// enum pro barvu (metoda Object.freeze zmrazí předaný objekt - jeho vlastnosti již nemohou být změněny)
+const Barva = Object.freeze({
+    cervena: 0,
+    zelena: 1,
+    modra: 2
+});
+
+// enum pro velikost
+const Velikost = Object.freeze({
+    mala: 0,
+    stredni: 1,
+    velka: 2
+});
+
+// tato třída reprezentuje produkt
+class Produkt {
+    constructor(nazev, barva, velikost) {
+        this.nazev = nazev;
+        this.barva = barva;
+        this.velikost = velikost;
+    }
+}
+
+// tato třída slouží k filtrování produktů v poli
+class ProduktFilter {
+    filtrujPodleBarvy(produkty, barva) {
+        // metoda filter vytváří nové vyfiltrované pole podle předané funkce s podmínkou
+        return produkty.filter(p => p.barva === barva);
+    }
+
+    filtrujPodleVelikosti(produkty, velikost) {
+        return produkty.filter(p => p.velikost === velikost);
+    }
+
+    // pokud bychom chtěli v budoucnu přidat například filtrování podle barvy i velikosti,
+    // tak bychom museli tuto třídu modifikovat a přidat do ní novou metodu
+}
+
+
+// vytvoření produktů
+const p1 = new Produkt("tričko", Barva.modra, Velikost.mala);
+const p2 = new Produkt("mikina", Barva.cervena, Velikost.stredni);
+const p3 = new Produkt("kalhoty", Barva.modra, Velikost.stredni);
+const produkty = [p1, p2, p3];
+
+// použití produkt filteru pro filtrování produktů
+const produktFilter = new ProduktFilter();
+console.log(produktFilter.filtrujPodleBarvy(produkty, Barva.modra));</code></pre>
+                    <p class="paragraph u-mb-small">Pokud bychom třídě ProduktFilter z předchozí ukázky chtěli přidat nějakou novou možnost filtrování, tak bychom ji museli modifikovat. Tím bychom porušili princip otevřenosti a uzavřenosti, který stanovuje, že by třídy měli být otevřené pro rozšíření, ale uzavřené pro změnu. Proto bychom se měli snažit navrhovat třídy tak, abychom k nim mohli přidat novou funkcionalitu bez nutnosti jejich modifikace. Následující ukázka ukazuje, jak můžeme třídu ProduktFilter z minulé ukázky udělat více rozšiřitelnou.</p>
+                    <pre class="code-box u-mb-medium"><code>const Barva = Object.freeze({
+    cervena: 0,
+    zelena: 1,
+    modra: 2
+});
+
+const Velikost = Object.freeze({
+    mala: 0,
+    stredni: 1,
+    velka: 2
+});
+
+class Produkt {
+    constructor(nazev, barva, velikost) {
+        this.nazev = nazev;
+        this.barva = barva;
+        this.velikost = velikost;
+    }
+}
+
+// pomocí těchto tříd si můžeme specifikovat, podle čeho budeme chtít produkty filtrovat
+class SpecifikaceBarvy {
+    constructor(barva) {
+        this.barva = barva;
+    }
+    // tato metoda zjistí, jestli má předaný produkt stejnou barvu jako specifikace
+    jeSplnena(produkt) {
+        return produkt.barva === this.barva;
+    }
+}
+class SpecifikaceVelikosti {
+    constructor(velikost) {
+        this.velikost = velikost;
+    }
+    jeSplnena(produkt) {
+        return produkt.velikost === this.velikost;
+    }
+}
+
+class ProduktFilter {
+    // namísto metod pro různé možnosti filtrace teď ProduktFilter obsahuje jen
+    // jednu univerzální, která produkty filtruje podle předané specifikace
+    filtruj(produkty, specifikace) {
+        return produkty.filter(p => specifikace.jeSplnena(p));
+    }
+}
+
+
+// pokud chceme ProduktFilter rozšířit o novou možnost filtrace,
+// tak si můžeme vytvořit novou třídu s podmínkou:
+class HromadnaSpecifikace {
+    constructor(...specifikace) {
+        this.specifikace = specifikace;
+    }
+    jeSplnena(produkt) {
+        // metoda every vrátí true, pokud se pro všechny položky pole v předané funkci vrátí true, jinak false
+        return this.specifikace.every(spec => spec.jeSplnena(produkt));
+    }
+}
+
+
+// vytvoření produktů
+const p1 = new Produkt("tričko", Barva.modra, Velikost.mala);
+const p2 = new Produkt("mikina", Barva.cervena, Velikost.stredni);
+const p3 = new Produkt("kalhoty", Barva.modra, Velikost.stredni);
+const produkty = [p1, p2, p3];
+
+// použití produkt filteru pro filtrování produktů
+const produktFilter = new ProduktFilter();
+// vytvoření specifikace, podle které se produkty vyfiltrují
+const spec = new HromadnaSpecifikace(
+    new SpecifikaceBarvy(Barva.modra),
+    new SpecifikaceVelikosti(Velikost.stredni)
+);
+console.log(produktFilter.filtruj(produkty, spec));</code></pre>
+                    <h3 class="heading-tertiary u-mb-tiny">Liskovové princip zaměnitelnosti</h3>
+                    <p class="paragraph u-mb-small">Tento princip je o tom, že by se s podtřídami mělo dát pracovat stejně jako s jejich nadtřídami bez rozbití aplikace. Pokud nějaký kód používá základní třídu, tak by měl fungovat správně i když dostane namísto základní třídy její podtřídu.</p>
+                    <p class="paragraph u-mb-small">Následující ukázka kódu ukazuje třídu Obdelnik a její podtřídu Ctverec. S instancemi těchto tříd pracuje funkce pouzijTo, která nastavuje výšku obdelníku a vypíše jeho obsah. Pokud ale funkci pouzijTo předáme namísto obdelníku čtverec, tak se obsah nevypíše správně. Takže je porušen Liskovové princip zaměnitelnosti, protože s podtřídou nejde pracovat stejně jako s nadtřídou.</p>
+                    <pre class="code-box u-mb-medium"><code>// třída pro reprezentaci obdelníku
+class Obdelnik {
+    constructor(sirka, vyska) {
+        this._sirka = sirka;
+        this._vyska = vyska;
+    }
+    
+    get sirka() { return this._sirka; }
+    get vyska() { return this._vyska; }
+
+    set sirka(value) { this._sirka = value; }
+    set vyska(value) { this._vyska = value; }
+
+    get obsah() {
+        return this._sirka * this._vyska;
+    }
+}
+
+// podtřída třídy Obdelnik pro reprezentaci čtverce
+class Ctverec extends Obdelnik {
+    constructor(velikost) {
+        super(velikost, velikost);
+    }
+
+    // tyto gettery se narozdíl od getteru obsah nedědí,
+    // takže je musíme z nadtřídy zavolat sami (nevím proč)
+    get sirka() { return super.sirka; }
+    get vyska() { return super.vyska; }
+
+    set sirka(value) {
+        this._sirka = this._vyska = value;
+    }
+    set vyska(value) {
+        this._sirka = this._vyska = value;
+    }
+}
+
+// tato funkce přijímá instanci třídy Obdelnik (měla by být schopna pracovat i s jejími podtřídami)
+function pouzijTo(ob) {
+    // získání šířky obdelníku
+    let sirka = ob.sirka;
+    // nastavení výšky obdelníku (pokud ale do funkce předáme čtverec,
+    // tak se při nastavení jeho výšky změní i výška)
+    ob.vyska = 10;
+
+    // pokud například do funkce předáme čtverec o rozměrech 5x5, tak očekáváme, že když mu nastavíme
+    // výšku na 10, bude jeho obsah 50 (ale při změně výšky se mění i šířka čtverce, takže nebude)
+    console.log(`Očekávaný obsah: ${sirka*10}`);
+    console.log(`Realita: ${ob.obsah}`);
+}
+
+const obdelnik = new Obdelnik(7, 8);
+const ctverec = new Ctverec(5);
+
+// s instancí třídy Obdelnik bude funkce pracovat správně
+pouzijTo(obdelnik);
+
+// s instancí podtřídy Ctverec nebude funkce pracovat správně
+pouzijTo(ctverec);</code></pre>
+                    <h3 class="heading-tertiary u-mb-tiny">Princip oddělení rozhraní</h3>
+                    <p class="paragraph u-mb-small">Tento princip se týká toho, že více speciálních rozhraní, je lepší než jedno univerzální. Pokud máme jedno velké rozhraní, tak můžeme ztrácet přehled o tom, které části rozhraní naše třídy používají.</p>
+                    <p class="paragraph u-mb-small">JavaScript sice rozhraní nemá, ale můžeme si pro ukázku takové provizorní vytvořit jako třídu. Následující ukázka ukazuje rozhraní Stroj, které definuje metody pro tisknutí a skenování dokumentu. Také ukazuje dvě třídy, které toto rozhraní implementují.</p>
+                    <pre class="code-box u-mb-small"><code>// v JavaScriptu rozhraní nejsou, takže si pro ukázku vytvoříme jen takové provizorní
+class Stroj {
+    constructor() {
+        // pokud se někdo pokusí vytvořit instanci třídy Stroj, tak se vyhodí chyba
+        if (this.constructor.name === "Stroj")
+            throw new Error("Stroj je abstraktní!");
+    }
+
+    tiskni(dokument) {}
+    skenuj(dokument) {}
+}
+
+
+// tato třída implementuje všechny metody rozhraní
+class MultifunkcniTiskarna extends Stroj {
+    tiskni(dokument) {
+        // nějaký kód pro vytisknutí dokumentu
+    }
+
+    skenuj(dokument) {
+        // nějaký kód pro skenování dokumentu
+    }
+}
+
+// tato třída implementuje jen jednu metodu rozhraní, které implementuje
+class StaraTiskarna extends Stroj {
+    tiskni(dokument) {
+        // nějaký kód pro vytisknutí dokumentu
+    }
+
+    // i když třída implementuje rozhraní Stroj, nedefinuje všechny
+    // jeho metody, takže by to mohlo někoho mást a mohl by se divit,
+    // proč nefungují i ostatní metody implementovaného rozhraní
+}</code></pre>
+                    <p class="paragraph u-mb-small">V předchozí ukázce třída StaraTiskarna implementuje jen jednu metodu rozhraní. Problém je, že o tom někdo, kdo bude s třídou pracovat, nemusí vědět. Mohl by se tedy divit, proč metoda skenuj nefunguje, když ji rozhraní Stroj předepisuje. Tento problém bychom mohli vyřešit tím, že bychom rozhraní Stroj rozdělili na více menších rozhraní. Následující ukázka to ukazuje. Pro dědění z více tříd je použita funkce aggregation, kterou jsem zkopíroval ze <a href="https://stackoverflow.com/questions/29879267/#answer-45332959" target="_blank" class="anchor">Stack Overflow</a>. Určitě nemusíte zkoumat jak to funguje, ani já to nevím.</p>
+                    <pre class="code-box u-mb-small"><code>// funkce pro dědění z více tříd ze Stack Overflow: https://stackoverflow.com/questions/29879267/es6-class-multiple-inheritance#answer-45332959
+var aggregation = (baseClass, ...mixins) => {
+    class base extends baseClass {
+        constructor (...args) {
+        super(...args);
+        mixins.forEach((mixin) => {
+            copyProps(this,(new mixin));
+        });
+        }
+    }
+    let copyProps = (target, source) => {  // this function copies all properties and symbols, filtering out some special ones
+        Object.getOwnPropertyNames(source)
+        .concat(Object.getOwnPropertySymbols(source))
+        .forEach((prop) => {
+            if (!prop.match(/^(?:constructor|prototype|arguments|caller|name|bind|call|apply|toString|length)$/))
+            Object.defineProperty(target, prop, Object.getOwnPropertyDescriptor(source, prop));
+        })
+    };
+    mixins.forEach((mixin) => {
+        // outside constructor() to allow aggregation(A,B,C).staticFunction() to be called etc.
+        copyProps(base.prototype, mixin.prototype);
+        copyProps(base, mixin);
+    });
+    return base;
+};
+
+
+// rozhraní Tiskarna
+class Tiskarna {
+    constructor() {
+        if (this.constructor.name === "Tiskarna")
+            throw new Error("Tiskarna je abstraktní!");
+    }
+
+    tiskni(dokument) {}
+}
+
+// rozhraní Skener
+class Skener {
+    constructor() {
+        if (this.constructor.name === "Tiskarna")
+            throw new Error("Skener je abstraktní!");
+    }
+
+    skenuj(dokument) {}
+}
+
+
+// třída implementující rozhraní Tiskarna
+class StaraTiskarna extends Tiskarna {
+    tiskni(dokument) {
+        // nějaký kód pro vytisknutí dokumentu
+    }
+}
+
+// třída implementující rozhraní Tiskarna a Skener
+class Kopirka extends aggregation(Tiskarna, Skener) {
+    tiskni(dokument) {
+        // nějaký kód pro vytisknutí dokumentu
+    }
+
+    skenuj(dokument) {
+        // nějaký kód pro skenování dokumentu
+    }
+}</code></pre>
+                    <p class="paragraph u-mb-small">Předchozí ukázka rozdělila rozhraní Stroj na rozraní Tiskarna a Skener, takže pokud chceme vytvořit třídu implementující metody tiskni i skenuj, tak musíme implementovat obě tyto rozhraní. Pokud chceme vytvořit třídu implementující jen metodu tiskni, tak stačí implementovat jen rozhraní Tiskarna. Je však důležité nezacházet do extrémů. Rozhraní by měla obsahovat metody, které se často používají nebo mohou používat současně.</p>
+                    <p class="paragraph u-mb-medium">Protože JavaScript rozhraní nemá, tak se ho tento princip tolik netýká. Je více relevantní v jiných programovacích jazycích. Tvorba provizorního rozhraní, které předchozí dvě ukázky ukazují, nemá žádné výhody. JavaScript nám nepřikáže že máme metody rozhraní implementovat a IDE nám je podle něj ani nevygeneruje.</p>
+                    <h3 class="heading-tertiary u-mb-tiny">Princip obrácení závislostí</h3>
+                    <p class="paragraph u-mb-small">Tento princip je o tom, že by high level moduly neměly být vázány na low level moduly.</p>
+                    <p class="paragraph u-mb-small">V následující ukázce se nachází třída Vztahy, která slouží k ukládání vztahů mezi lidmi. Tato třída představuje low level module. Také se tam nachází třída Pruzkum, která používá data, uložená ve třídě Vztahy a provádí s nimi menší průzkum. Třída Pruzkum představuje high level module.</p>
+                    <pre class="code-box u-mb-small"><code>const Vztah = Object.freeze({
+    rodic: 0,
+    dite: 1,
+    sourozenec: 2
+});
+
+class Clovek {
+    constructor(jmeno) {
+        this.jmeno = jmeno;
+    }
+}
+
+// LOW LEVEL MODULE
+// Tato třída slouží jako uložiště vztahů mezi lidmi
+class Vztahy {
+    constructor() {
+        this.data = [];
+    }
+
+    // metoda pro přidání vztahu mezi rodičem a dítětem
+    pridejRodiceADite(rodic, dite) {
+        this.data.push({
+            od: rodic,
+            typ: Vztah.rodic,
+            k: dite
+        });
+        this.data.push({
+            od: dite,
+            typ: Vztah.dite,
+            k: rodic
+        });
+    }
+}
+
+// HIGH LEVEL MODULE
+// Tato třída získává informace z třídy Vztahy (low level modulu)
+class Pruzkum {
+    constructor(vztahy) {
+        // - toto je špatně, high level module by se neměl zajímat o to, jakým způsobem jsou data uložená
+        // - pokud bychom později chtěli data ukládat jiným způsobem, tak bychom to museli změnit i zde
+        const data = vztahy.data.filter(v => v.od.jmeno === "Karel" && v.typ === Vztah.rodic);
+        for (let v of data) {
+            console.log(`Karel má dítě jménem ${v.k.jmeno}.`);
+        }
+    }
+}
+
+
+const rodic = new Clovek("Karel");
+const dite1 = new Clovek("Marek");
+const dite2 = new Clovek("Honza");
+
+// low level module
+const vztahy = new Vztahy();
+vztahy.pridejRodiceADite(rodic, dite1);
+vztahy.pridejRodiceADite(rodic, dite2);
+
+// high level module
+new Pruzkum(vztahy);</code></pre>
+                    <p class="paragraph u-mb-small">Třída Pruzkum (high level module) z minulé ukázky počítá s tím, že jsou data ve třídě Vztahy (low level module) uložena v poli. V podstatě si ze třídy Vztahy vezme pole se kterým pracuje. Pokud bychom se ale rozhodli data ve třídě Vztahy ukládat nějak jinak, tak bychom museli měnit i kód ve třídě Pruzkum. Proto by bylo lepší, kdyby se třída Pruzkum o to, jak jsou data ve třídě Vztahy uložena vůbec nezajímala. Následující ukázka ukazuje, jak můžeme kód z minulé ukázky zlepšit.</p>
+                    <pre class="code-box u-mb-medium"><code>const Vztah = Object.freeze({
+    rodic: 0,
+    dite: 1,
+    sourozenec: 2
+});
+
+class Clovek {
+    constructor(jmeno) {
+        this.jmeno = jmeno;
+    }
+}
+
+// třída Pruzkum pracuje s třídami, které implementují toto rozhraní (jde o to aby měli metodu najdiVsechnyDetiRodice)
+class ProhlizecVztahu {
+    constructor() {
+        if (this.constructor.name === "ProhlizecVztahu")
+            throw new Error("ProhlizecVztahu je abstraktní!");
+    }
+
+    najdiVsechnyDetiRodice() {}
+}
+
+// LOW LEVEL MODULE
+class Vztahy extends ProhlizecVztahu {
+    constructor() {
+        super();
+        this.data = [];
+    }
+
+    pridejRodiceADite(rodic, dite) {
+        this.data.push({
+            od: rodic,
+            typ: Vztah.rodic,
+            k: dite
+        });
+        this.data.push({
+            od: dite,
+            typ: Vztah.dite,
+            k: rodic
+        });
+    }
+
+    // metoda pro získání všech dětí předaného rodiče (high level module ji může použít)
+    najdiVsechnyDetiRodice(rodic) {
+        return this.data.filter(v =>
+            v.od.jmeno === rodic &&
+            v.typ === Vztah.rodic
+        ).map(v => v.k);
+    }
+}
+
+// HIGH LEVEL MODULE
+class Pruzkum {
+    constructor(prohlizec) {
+        // - high level module nezajímá jakým způsobem jsou data v low level modulu uložená
+        // - pro získání dat se použije metoda low level modulu
+        for (let dite of prohlizec.najdiVsechnyDetiRodice("Karel")) {
+            console.log(`Karel má dítě jménem ${dite.jmeno}.`);
+        }
+    }
+}
+
+
+const rodic = new Clovek("Karel");
+const dite1 = new Clovek("Marek");
+const dite2 = new Clovek("Honza");
+
+// low level module
+const vztahy = new Vztahy();
+vztahy.pridejRodiceADite(rodic, dite1);
+vztahy.pridejRodiceADite(rodic, dite2);
+
+// high level module
+new Pruzkum(vztahy);</code></pre>
+                    <h2 class="heading-secondary u-mb-tiny">DRY (Don't Repeat Yourself)</h2>
+                    <p class="paragraph u-mb-small">DRY je princip, který je zaměřený na redukci opakování stejného kódu na více místech. DRY je zkratkou pro Don't Repeat Yourself, což v češtině znamená 'neopakuj se'. Měli bychom se tedy snažit psát kód tak, abychom nepoužívali na více místech stejný nebo podobný kód.</p>
+                    <p class="paragraph u-mb-small">Následující ukázka ukazuje funkci, která slouží k provedení výpočtu mezi dvěma čísly a vypsání výsledku do konzole.</p>
+                    <pre class="code-box u-mb-small"><code>function spocitejAVypis(cislo1, cislo2, operace) {
+    let vysledek;
+    let priklad;
+    switch (operace) {
+        case "scitani":
+            vysledek = cislo1 + cislo2;
+            priklad = `${cislo1} + ${cislo2} = ${vysledek}`;
+            console.log(priklad);
+            break;
+        case "odecitani":
+            vysledek = cislo1 - cislo2;
+            priklad = `${cislo1} - ${cislo2} = ${vysledek}`;
+            console.log(priklad);
+            break;
+        case "nasobeni":
+            vysledek = cislo1 * cislo2;
+            priklad = `${cislo1} * ${cislo2} = ${vysledek}`;
+            console.log(priklad);
+            break;
+        case "deleni":
+            vysledek = cislo1 / cislo2;
+            priklad = `${cislo1} / ${cislo2} = ${vysledek}`;
+            console.log(priklad);
+            break;
+    }
+}
+
+spocitejAVypis(2, 4, "scitani");</code></pre>
+                    <p class="paragraph u-mb-small">V předchozí ukázce se opakuje čtyřikrát podobný kód. Následující ukázka ukazuje, jak bychom kód mohli vylepšit.</p>
+                    <pre class="code-box u-mb-medium"><code>function spocitejAVypis(cislo1, cislo2, operace) {
+    let vysledek;
+    let znamenko;
+    switch (operace) {
+        case "scitani":
+            vysledek = cislo1 + cislo2;
+            znamenko = "+";
+            break;
+        case "odecitani":
+            vysledek = cislo1 - cislo2;
+            znamenko = "-";
+            break;
+        case "nasobeni":
+            vysledek = cislo1 * cislo2;
+            znamenko = "*";
+            break;
+        case "deleni":
+            vysledek = cislo1 / cislo2;
+            znamenko = "/";
+            break;
+    }
+    const priklad = `${cislo1} ${znamenko} ${cislo2} = ${vysledek}`;
+    console.log(priklad);
+}
+
+spocitejAVypis(2, 4, "scitani");</code></pre>
+                    <h2 class="heading-secondary u-mb-tiny">KISS (Keep it simple, Stupid!)</h2>
+                    <p class="paragraph u-mb-small">Název KISS je zkratkou pro 'Keep it simple, Stupid!'. V češtině to znamená 'Nech to jednoduché, Hloupé!'. Tento princip je tedy o tom, že bychom se měli snažit psát jednoduchý kód.</p>
+                    <p class="paragraph u-mb-small">Následující kód ukazuje, jak můžeme například zjednodušit vypsaní hodnoty proměnné do konzole s podmínkou že když proměnná neobsahuje žádnou hodnotu, tak se vypíše, že proměnná hodnotu neobsahuje.</p>
+                    <pre class="code-box u-mb-small"><code>// použití podmínek
+if (promenna === null || promenna === undefined) {
+    console.log("Proměnná neobsahuje žádnou hodnotu.");
+} else {
+    console.log(promenna);
+}
+
+// využití short circuitingu (pokud je proměnná undefined nebo null, tak se použije řetězec)
+console.log(promenna ?? "Proměnná neobsahuje žádnou hodnotu.");</code></pre>
+                    <p class="paragraph u-mb-small">Předchozí ukázka ukazuje, jak můžeme díky short circuitingu zjednodušit vypsání hodnoty do konzole s podmínkou. Další ukázka ukazuje, jak můžeme například zjednodušit nějakou jednodušší funkci pomocí arrow funkce.</p>
+                    <pre class="code-box u-mb-medium"><code>// funkce pro sečtení dvou čísel
+function secti1(c1, c2) {
+    return c1 + c2;
+}
+
+// arrow funkce pro sečtení dvou čísel pomocí
+const secti2 = (c1, c2) => c1 + c2;</code></pre>
+                    <h2 class="heading-secondary u-mb-tiny">YAGNI (You ain't gonna need it)</h2>
+                    <p class="paragraph u-mb-medium">Myšlenkou tohoto principu je, že bychom neměli přidávat funkcionalitu, dokud ji nepotřebujeme. Neměli bychom tedy do naší aplikace přidávat nějakou funkci, kdybychom ji náhodou někdy v budoucnu potřebovali.</p>
+                    <p class="paragraph u-mb-medium">Návrhové principy, o kterých jste se v této části dozvěděli, dodržujte jen do míry, do jaké vám pomáhají psát lepší kód. Není potřeba je vždy dodržovat za každou cenu, záleží na vás.</p>
+                    <div class="u-text-center">
+                        <a href="../builder/" class="button-primary">pokračovat na další část</a>
+                    </div>
+                </div>
+                <div class="article-page__lateral-side">
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
