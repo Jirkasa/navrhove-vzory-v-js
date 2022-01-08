@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=yes maximum-scale=2.2 minimum-scale=1.0">
+    <title>Návrhové vzory v JS - Factory</title>
+
+    <script src="../media/js/libraries/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+
+    <link rel="stylesheet" href="../media/css/style.css">
+</head>
+<body>
+    <div class="page">
+        <header class="header">
+            <div class="header__content">
+                <h2 class="header__title"><span>Návrhové vzory</span> v JS</h2>
+                <nav class="header__nav">
+                    <ul>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+        <div class="article-page">
+            <div class="article-page__content">
+                <div class="article-page__main-side">
+                    <h1 class="heading-primary u-mb-small">Factory</h1>
+                    <hr class="horizontal-rule u-mb-small">
+                    <p class="paragraph u-mb-medium">V této části se podíváme na návrhový vzor Factory. Jedná se o návrhový vzor sloužící k vytváření objektů různými způsoby. Můžeme jej rozdělit na 3 typy: Factory, Factory metoda a abstraktní Factory. Všechny si v této části ukážeme.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Proč Factory použít</h2>
+                    <p class="paragraph u-mb-small">Občas můžeme chtít umožnit vytvářet instance jedné třídy více způsoby. Mohli bychom například do konstruktoru přidat nějaké volitelné parametry nebo tak něco, ale to není vždy ideální. Tímto způsobem se můžeme dostat do 'optional parameter hell', což v češtině znamená 'peklo volitelných parametrů'. Proto je lepší si na vytváření objektů více způsoby vytvořit statické metody (Factory metody) nebo Factory.</p>
+                    <p class="paragraph u-mb-small">Návrhový vzor Factory můžeme rozdělit na tyto 3 typy:</p>
+                    <ul class="unordered-list u-mb-medium">
+                        <li><b>Factory metoda:</b> statické metoda, kterou můžeme použít namísto konstruktoru</li>
+                        <li><b>Factory:</b> metody pro vytváření objektů nějaké třídy se nacházejí v samostatné třídě</li>
+                        <li><b>Abstraktní Factory:</b> třída, která používá více Factory tříd pro vytváření objektů nějaké skupiny tříd</li>
+                    </ul>
+                    <h2 class="heading-secondary u-mb-tiny">Příklad - Factory metoda</h2>
+                    <p class="paragraph u-mb-small">Factory metoda je statická metoda, která slouží k vytváření objektů namísto konstruktoru. Můžeme si jich ve třídě vytvořit více a každá bude objekt vytvářet jiným způsobem.</p>
+                    <p class="paragraph u-mb-small">Následující ukázka ukazuje, jak bychom mohli umožnit vytvářet objekty více způsoby pomocí volitelného parametru v konstruktoru.</p>
+                    <pre class="code-box u-mb-small"><code>const SouradnicovySystem = Object.freeze({
+    kartezsky: 0,
+    polarni: 1
+});
+
+class Bod {
+    // při vytváření objektu musíme specifikovat, podle jakého souřadnicového systému chceme bod vytvořit
+    constructor(a, b, souradnicovySystem = SouradnicovySystem.kartezsky) {
+        switch (souradnicovySystem) {
+            case SouradnicovySystem.kartezsky:
+                this.x = a;
+                this.y = b;
+                break;
+            case SouradnicovySystem.polarni:
+                this.x = a * Math.cos(b);
+                this.y = a * Math.sin(b);
+                break;
+        }
+    }
+}
+
+const bod1 = new Bod(4, 5);
+// pokud chceme bod vytvořit podle polárního souřadnicového systému, tak musíme přidat volitelný parametr
+const bod2 = new Bod(5, Math.PI/2, SouradnicovySystem.polarni);</code></pre>
+                    <p class="paragraph u-mb-small">Předchozí ukázka sice umožňuje vytváření objektu různými způsoby, ale má pár nevýhod. Názvy parametrů nejsou deskriptivní a navíc musíme předávat volitelný parametr. Proto v tomto případě dává smysl vytvořit si Factory metody, které pro vytváření objektů použijeme namísto konstruktoru. Následující ukázka to ukazuje.</p>
+                    <pre class="code-box u-mb-medium"><code>class Bod {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    // Factory metoda pro vytvoření bodu pomocí kartézského souřadnicového systému
+    static vytvorKartezskyBod(x, y) {
+        return new Bod(x, y);
+    }
+
+    // Factory metoda pro vytvoření bodu pomocí polárního souřadnicového systému
+    static vytvorPolarniBod(rho, theta) {
+        return new Bod(rho*Math.cos(theta), rho*Math.sin(theta));
+    }
+}
+
+// použití Factory metod pro vytvoření objektů
+const bod1 = Bod.vytvorKartezskyBod(4, 5);
+const bod2 = Bod.vytvorPolarniBod(5, Math.PI/2);</code></pre>
+                    <h2 class="heading-secondary u-mb-tiny">Příklad - Factory</h2>
+                    <p class="paragraph u-mb-small">Factory je třída, která obsahuje metody pro vytváření instancí nějaké třídy různými způsoby. Takže narozdíl od Factory metod, které se nacházejí přímo ve třídě, podle které vytváříme objekty, máme metody pro vytváření objektů seskupené v samostatné třídě.</p>
+                    <p class="paragraph u-mb-small">Následující ukázka ukazuje, jak můžeme vytvořit Factory pro třídu Bod, která byla ukázana v ukázce pro Factory metodu.</p>
+                    <pre class="code-box u-mb-small"><code>class Bod {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    // statický getter pro získání Factory pro vytvoření bodu
+    static get factory() {
+        return new BodFactory();
+    }
+}
+
+// Factory pro třídu Bod
+class BodFactory {
+    vytvorKartezskyBod(x, y) {
+        return new Bod(x, y);
+    }
+
+    vytvorPolarniBod(rho, theta) {
+        return new Bod(rho*Math.cos(theta), rho*Math.sin(theta));
+    }
+}
+
+// použití Factory pro vytvoření objektů
+const bod1 = Bod.factory.vytvorKartezskyBod(4, 5);
+const bod2 = Bod.factory.vytvorPolarniBod(5, Math.PI/2);</code></pre>
+                    <p class="paragraph u-mb-medium">V předchozí ukázce si musíme pro použití Factory vytvořit instanci. V tomto případě to ale není potřeba a metody by ve Factory třídě mohli být klidně statické. Vytvářet instanci by dávalo smysl, pokud by Factory třída uchovávala nějaká data. Také je ve třídě Bod statický getter, pomocí kterého můžeme Factory pro vytvoření bodu získat. Díky tomu někdo, kdo by s třídou Bod pracoval nemusí hledat, kterou Factory třídu má k vytvoření bodu použít a jen zavolá tento getter.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Příklad - Abstraktní Factory</h2>
+                    <p class="paragraph u-mb-small">Abstraktní Factory je třída, která používá Factory třídy, pro vytváření instancí nějaké skupiny tříd.</p>
+                    <p class="paragraph u-mb-small">Následující ukázka ukazuje třídu AutomatNaNapoje, která představuje automat na nápoje, který můžeme použít k tvorbě různých objektů představujících nápoje.</p>
+                    <pre class="code-box u-mb-medium"><code>class Napoj {
+    vypij() {}
+}
+
+class Caj extends Napoj {
+    vypij() {
+        console.log("Tento čaj je super.");
+    }
+}
+
+class Kava extends Napoj {
+    vypij() {
+        console.log("Tato káva je lahodná.");
+    }
+}
+
+
+// abstraktní třída pro Factory třídy
+// - jde jen o to aby Factory třídy měli metodu prepare
+// - v JavaScriptu je zbytečné vytvářet si tuto abstraktní třídu, nemá to žádné výhody
+class NapojFactory {
+    priprav(mnozstvi) { /* abstraktní */ }
+}
+
+// Factory pro objekty typu Caj
+class CajFactory extends NapojFactory {
+    // jen se vrátí nový objekt typu Caj (do konzole se přitom jen tak vypíše, že se nápoj připravuje..)
+    priprav(mnozstvi) {
+        console.log(`Vkládám čajový sáček, vařím vodu... Nalévám ${mnozstvi}ml vody... Hotovo!`);
+        return new Caj();
+    }
+}
+
+// Factory pro objekty typu Kava
+class KavaFactory extends NapojFactory {
+    // jen se vrátí nový objekt typu Kava (do konzole se přitom jen tak vypíše, že se nápoj připravuje..)
+    priprav(mnozstvi) {
+        console.log(`Sypu kávový prášek, vařím vodu... Nalévám ${mnozstvi}ml vody... Hotovo!`);
+        return new Kava();
+    }
+}
+
+
+// tento objekt obsahuje všechny dostupné Factory třídy
+const DostupneNapoje = Object.freeze({
+    "čaj": CajFactory,
+    "káva": KavaFactory
+});
+
+// Abstraktní Factory
+class AutomatNaNapoje {
+    constructor() {
+        // do vlastnosti factories se uloží instance všech dostupných Factory tříd
+        this.factories = {};
+        for (let napoj in DostupneNapoje) {
+            this.factories[napoj] = new DostupneNapoje[napoj]();
+        }
+    }
+
+    // pomocí této metody můžeme vytvořit nový objekt (připravit nový nápoj)
+    pripravNapoj(napoj, mnozstvi) {
+        if (!this.factories[napoj]) throw new Error("Tento nápoj neumím připravit.");
+
+        return this.factories[napoj].priprav(mnozstvi);
+    }
+}
+
+
+// vytvoření Abstraktní Factory (v tomto případě automatu na nápoje)
+const automat = new AutomatNaNapoje();
+
+// použití Abstraktní Factory pro vytváření objektů
+const caj = automat.pripravNapoj("čaj", 300);
+caj.vypij();
+const kava = automat.pripravNapoj("káva", 250);
+kava.vypij();</code></pre>
+                    <div class="u-text-center">
+                        <a href="#" class="button-primary">pokračovat na další část</a>
+                    </div>
+                </div>
+                <div class="article-page__lateral-side">
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
