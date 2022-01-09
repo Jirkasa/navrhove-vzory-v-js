@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=yes maximum-scale=2.2 minimum-scale=1.0">
+    <title>Návrhové vzory v JS - Prototype</title>
+
+    <script src="../media/js/libraries/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+
+    <link rel="stylesheet" href="../media/css/style.css">
+</head>
+<body>
+    <div class="page">
+        <header class="header">
+            <div class="header__content">
+                <h2 class="header__title"><span>Návrhové vzory</span> v JS</h2>
+                <nav class="header__nav">
+                    <ul>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+        <div class="article-page">
+            <div class="article-page__content">
+                <div class="article-page__main-side">
+                    <h1 class="heading-primary u-mb-small">Prototype</h1>
+                    <hr class="horizontal-rule u-mb-small">
+                    <p class="paragraph u-mb-medium">Tato část je o návrhovém vzoru Prototype. Tento návrhový vzor slouží k vytváření objektů kopírováním existujících objektů.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Proč Prototype použít</h2>
+                    <p class="paragraph u-mb-small">Složité objekty (např. auto) nejsou skoro nikdy navrhovány od nuly. Pokud někdo například navrhuje nové auto, tak se dívá co již udělali jiní lidé a snaží se to vylepšit. Existující návrh (hotový nebo částečně hotový) je Prototype.</p>
+                    <p class="paragraph u-mb-small">Prototype je objekt, který si můžeme zkopírovat a poupravit si jej dle našich potřeb. Kopírování objektu ale není snadné jako kopírování primitivních datových typů. Pokud přiřadíme proměnnou uchovávají objekt jiné proměnné, tak budou obě proměnné odkazovat na stejný objekt, protože objekty se předávají adresou. V této části si ukážeme, jakými různými způsoby můžeme objekty kopírovat.</p>
+                    <p class="paragraph u-mb-medium">I když si v této části ukážeme jakými způsoby se dá objekt kopírovat, tak je nejlepší na kopírování objektů použít nějakou knihovnu. Například <a href="https://lodash.com/docs/4.17.15#cloneDeep" target="_blank" class="anchor">Lodash</a> nám tuto funkcionalitu poskytuje. Není potřeba znovu vynalézat kolo.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Příklad - kopírování objektů pomocí metod</h2>
+                    <p class="paragraph u-mb-small">Nejsnažší, ale pracnější cesta pro kopírování objektu, je vytvořit si pro tuto operaci ve třídě kopírovaného objektu speciální metodu. V této metodě se vytvoří nový objekt, do kterého se uloží vlastnosti kopírovaného objektu a objekt se vrátí. Je ale potřeba počítat s tím, že pokud objekt uchovává ještě nějaké další objekty, tak je pro ně tento krok potřeba učinit také.</p>
+                    <pre class="code-box u-mb-medium"><code>class Clovek {
+    constructor(jmeno, adresa) {
+        this.jmeno = jmeno;
+        this.adresa = adresa;
+    }
+
+    // metoda pro zkopírování objektu
+    deepCopy() {
+        // objekt uchovává jiný objekt, při kopírování je potřeba
+        // pro tento objekt také zavolat metodu pro kopírování
+        return new Clovek(this.jmeno, this.adresa.deepCopy());
+    }
+
+    toString() {
+        return `${this.jmeno} žije v ${this.adresa}.`;
+    }
+}
+
+class Adresa {
+    constructor(ulice, mesto, zeme) {
+        this.ulice = ulice;
+        this.mesto = mesto;
+        this.zeme = zeme;
+    }
+
+    // metoda pro zkopírování objektu
+    deepCopy() {
+        return new Adresa(this.ulice, this.mesto, this.zeme);
+    }
+
+    toString() {
+        return `${this.ulice}, ${this.mesto}, ${this.zeme}`;
+    }
+}
+
+
+// tento objekt se použije jako Prototype
+const karel = new Clovek("Karel", new Adresa("Pražská 14", "Praha", "ČR"));
+
+// zkopírování Prototype objektu
+const filip = karel.deepCopy();
+// poupravení zkopírovaného objektu
+filip.jmeno = "Filip";
+filip.adresa.ulice = "Pražská 15";
+
+console.log(karel.toString());
+console.log(filip.toString());</code></pre>
+                    <h2 class="heading-secondary u-mb-tiny">Příklad - kopírování objektů pomocí speciální komponenty</h2>
+                    <p class="paragraph u-mb-small">Další cesta pro kopírování objektů, je vytvořit si pro tuto operaci speciální komponentu. Takže bychom si mohli vytvořit nějakou třídu, která nám bude poskytovat metodu pro zkopírování předaného objektu.</p>
+                    <p class="paragraph u-mb-small">Pro zkopírování objektu můžeme použít trik, který ukazuje následující ukázka. Můžeme použít metody JSON.parse a JSON.stringify. Tyto metody se používají pro převod objektu na řetězec a naopak. Metoda JSON.stringify převádí objekt na řetězec a metoda JSON.parse převádí řetězec na objekt. Pokud objekt převedeme na řetězec a potom na objekt, tak tím objekt v podstatě zkopírujeme.</p>
+                    <pre class="code-box u-mb-small"><code>/* ... */
+
+const karel = new Clovek("Karel", new Adresa("Pražská 14", "Praha", "ČR"));
+
+// zkopírování objektu pomocí metod JSON.parse a JSON.stringify
+const filip = JSON.parse(JSON.stringify(karel));
+filip.jmeno = "Filip";
+filip.adresa.ulice = "Pražská 15";
+
+// objekt filip nemá přístup k metodě toString, protože není napojený k prototypu
+console.log(filip.toString());</code></pre>
+                    <p class="paragraph u-mb-small">Problém způsobu kopírování objektu, který je ukázán v předchozí ukázce je v tom, že zkopírovaný objekt nebude napojený na prototype a nebudeme tedy moci například používat metody, které jsme si definovali ve třídě, podle které jsme objekt vytvořili. Proto musíme zkopírovaný objekt nějakým způsobem zrekonstruovat, aby byl k prototypu připojený.</p>
+                    <p class="paragraph u-mb-small">Následující ukázka ukazuje třídu Serializer. Tato třída obsahuje metodu clone, kterou můžeme použít ke zkopírování objektu. V metodě clone se u kopírovaného objektu a objektů, které obsahuje nejdříve označí, pomocí jaké třídy byly vytvořeny. Poté se objekt zkopíruje pomocí metod JSON.parse a JSON.stringify a nakonec se zrekonstruuje aby byl připojený k prototypu.</p>
+                    <pre class="code-box u-mb-medium"><code>class Clovek {
+    constructor(jmeno, adresa) {
+        this.jmeno = jmeno;
+        this.adresa = adresa;
+    }
+
+    toString() {
+        return `${this.jmeno} žije v ${this.adresa}.`;
+    }
+}
+
+class Adresa {
+    constructor(ulice, mesto, zeme) {
+        this.ulice = ulice;
+        this.mesto = mesto;
+        this.zeme = zeme;
+    }
+
+    toString() {
+        return `${this.ulice}, ${this.mesto}, ${this.zeme}`;
+    }
+}
+
+
+// třída pro kopírování objektů
+class Serializer
+{
+    constructor(types){
+        // uložení tříd, podle které byl objekt a objekty, které objekt uchovává vytvořeny
+        this.types = types;
+    }
+
+    // tato metoda označí předaný objekt a objekty, které uchovává, indexem k typu v poli types
+    markRecursive(object) {
+        // nalezení indexu, na kterém je uložena třída, podle které byl předaný objekt vytvořen
+        let idx = this.types.findIndex(t => {
+            return t.name === object.constructor.name;
+        });
+        // pokud našel index ke třídě v poli types, tak se objekt tímto indexem označí
+        if (idx !== -1) {
+            // označení objektu indexem, který značí třídu v poli types
+            object['typeIndex'] = idx;
+
+            // procházení klíčů (vlastností) objektu
+            for (let key in object) {
+                // pokud objekt obsahuje vlastní vlastnost pod klíčem key (nemá ji v prototypu),
+                // tak se pro tuto vlastnost rekurzivně zavolá metoda markRecursive
+                if (object.hasOwnProperty(key) && object[key] != null)
+                    this.markRecursive(object[key]);
+            }
+        }
+    }
+
+    // tato metoda slouží k rekonstrukci zkopírovaného objektu ()
+    reconstructRecursive(object) {
+        // tento kód proběhne, pokud má objekt vlastnost typeIndex
+        if (object.hasOwnProperty('typeIndex')) {
+            // získání třídy, podle které by měl rekonstruovaný objekt být vytvořen
+            let type = this.types[object.typeIndex];
+            // vytvoření nového objektu pomocí získané třídy
+            let obj = new type();
+            // procházení klíčů objektu object
+            for (let key in object) {
+                // pokud objekt obsahuje vlastní vlastnost pod klíčem key (nemá ji v prototypu),
+                // tak se pro tuto vlastnost rekurzivně zavolá metoda reconstructRecursive a výsledek
+                // se uloží nově vytvořenému objektu
+                if (object.hasOwnProperty(key) && object[key] != null) {
+                    obj[key] = this.reconstructRecursive(object[key]);
+                }
+            }
+            // odstranění vlastnosti typeIndex, která byla použita k určení třídy, podle které má být objekt vytvořen
+            delete obj.typeIndex;
+            // nový objekt se vrátí
+            return obj;
+        }
+        // pokud objekt nemá vlastnost typeIndex, tak se jen vrátí (nemusí to být objekt)
+        return object;
+    }
+
+    clone(object) {
+        // označení objektu a objektů, které objekt uchovává indexem
+        // ke třídě v poli types, podle které byly objekty vytvořeny
+        this.markRecursive(object);
+        // vytvoření kopie objektu
+        let copy = JSON.parse(JSON.stringify(object));
+        // zkopírovaný objekt se zrekonstruuje a metoda ji vrátí
+        return this.reconstructRecursive(copy);
+    }
+}
+
+
+// tento objekt se použije jako Prototype
+const karel = new Clovek("Karel", new Adresa("Pražská 14", "Praha", "ČR"));
+
+// vytvoření serializeru, který se použije ke kopírování objektu
+// - musíme specifikovat, podle jakých tříd byly objekty v kopírovaném objektu vytvořeny
+const serializer = new Serializer([Clovek, Adresa]);
+// zkopírování objektu pomocí serializeru
+const filip = serializer.clone(karel);
+filip.jmeno = "Filip";
+filip.adresa.ulice = "Pražská 15";
+
+console.log(karel.toString());
+console.log(filip.toString());</code></pre>
+                    <h2 class="heading-secondary u-mb-tiny">Příklad - Prototype Factory</h2>
+                    <p class="paragraph u-mb-small">Pokud chceme, tak si pro pohodlnější kopírování Prototype objektů můžeme vytvořit Factory, abychom nemuseli používat přímo Serializer třídu z minulé ukázky. Následující ukázka ukazuje, jak bychom to mohli udělat.</p>
+                    <pre class="code-box u-mb-medium"><code>class Zamestnanec {
+    constructor(jmeno, adresa) {
+        this.jmeno = jmeno;
+        this.adresa = adresa;
+    }
+
+    toString() {
+        return `${this.jmeno} pracuje v ${this.adresa}.`;
+    }
+}
+
+class Adresa {
+    constructor(ulice, mesto, zeme) {
+        this.ulice = ulice;
+        this.mesto = mesto;
+        this.zeme = zeme;
+    }
+
+    toString() {
+        return `${this.ulice}, ${this.mesto}, ${this.zeme}`;
+    }
+}
+
+
+class Serializer
+{
+    constructor(types){
+        this.types = types;
+    }
+
+    markRecursive(object) {
+        let idx = this.types.findIndex(t => {
+            return t.name === object.constructor.name;
+        });
+        if (idx !== -1) {
+            object['typeIndex'] = idx;
+
+            for (let key in object) {
+                if (object.hasOwnProperty(key) && object[key] != null)
+                    this.markRecursive(object[key]);
+            }
+        }
+    }
+
+    reconstructRecursive(object) {
+        if (object.hasOwnProperty('typeIndex')) {
+            let type = this.types[object.typeIndex];
+            let obj = new type();
+            for (let key in object) {
+                if (object.hasOwnProperty(key) && object[key] != null) {
+                    obj[key] = this.reconstructRecursive(object[key]);
+                }
+            }
+            delete obj.typeIndex;
+            return obj;
+        }
+        return object;
+    }
+
+    clone(object) {
+        this.markRecursive(object);
+        let copy = JSON.parse(JSON.stringify(object));
+        return this.reconstructRecursive(copy);
+    }
+}
+
+
+// Factory pro objekty třídy Zamestnanec (pro vytváření objektů používá Prototype objekty)
+class ZamestnanecFactory {
+    // serializer pro kopírování Prototype objektů
+    static serializer = new Serializer([Zamestnanec, Adresa]);
+    // Prototype objekty
+    static zamestnanecPraha = new Zamestnanec(null, new Adresa(null, "Praha", "ČR"));
+    static zamestnanecBrno = new Zamestnanec(null, new Adresa(null, "Brno", "ČR"));
+
+    static _novyZamestnanec(proto, jmeno, ulice) {
+        const kopie = ZamestnanecFactory.serializer.clone(proto);
+        kopie.jmeno = jmeno;
+        kopie.adresa.ulice = ulice;
+        return kopie;
+    }
+
+    static novyPrazskyZamestnanec(jmeno, ulice) {
+        return this._novyZamestnanec(ZamestnanecFactory.zamestnanecPraha, jmeno, ulice);
+    }
+
+    static novyBrnenskyZamestnanec(jmeno, ulice) {
+        return this._novyZamestnanec(ZamestnanecFactory.zamestnanecBrno, jmeno, ulice);
+    }
+}
+
+
+// použití Factory pro vytvoření objektů (ani nemusíme vědět o tom, že Factory používá nějaké Prototypy)
+const karel = ZamestnanecFactory.novyPrazskyZamestnanec("Karel", "Pražská 14");
+const filip = ZamestnanecFactory.novyBrnenskyZamestnanec("Filip", "Brněnská 82");
+
+console.log(karel.toString());
+console.log(filip.toString());</code></pre>
+                    <div class="u-text-center">
+                        <a href="#" class="button-primary">pokračovat na další část</a>
+                    </div>
+                </div>
+                <div class="article-page__lateral-side">
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
