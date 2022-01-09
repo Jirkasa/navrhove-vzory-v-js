@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=yes maximum-scale=2.2 minimum-scale=1.0">
+    <title>Návrhové vzory v JS - Singleton</title>
+
+    <script src="../media/js/libraries/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+
+    <link rel="stylesheet" href="../media/css/style.css">
+</head>
+<body>
+    <div class="page">
+        <header class="header">
+            <div class="header__content">
+                <h2 class="header__title"><span>Návrhové vzory</span> v JS</h2>
+                <nav class="header__nav">
+                    <ul>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+        <div class="article-page">
+            <div class="article-page__content">
+                <div class="article-page__main-side">
+                    <h1 class="heading-primary u-mb-small">Singleton</h1>
+                    <hr class="horizontal-rule u-mb-small">
+                    <p class="paragraph u-mb-medium">V této části se podíváme na návrhový vzor Singleton. Jedná se o návrhový vzor, který zajišťuje, že se vytvoří jen jedna instance třídy, která se opakovaně vrací namísto vytváření nové.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Proč Singleton použít</h2>
+                    <p class="paragraph u-mb-small">Pro nějaké komponenty v aplikaci může dávat smysl vytvořit jen jednu instanci nějaké třídy. Například pro spojení s databází. Nechceme vytvářet novou instanci třídy pro nové spojení s databází když už jsme s ní spojeni.</p>
+                    <p class="paragraph u-mb-medium">Návrhový vzor Singleton je o tom, že se při prvním zavolání konstruktoru třídy vytvoří nová instance třídy, která se po každém dalším volání vrací namísto vytváření nové instance.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Příklad - Monostate</h2>
+                    <p class="paragraph u-mb-small">Než se podíváme na příklad Singletonu, tak se ještě podíváme na návrhový vzor Monostate. Dalo by se říct, že je to takový druh Singletonu. Návrhový vzor Monostate je o tom, že jsou vlastnosti uložené na třídě namísto jejích instancí, ale přístup k těmto vlastnostem máme přes instance. Následující ukázka Monostate ukazuje.</p>
+                    <pre class="code-box u-mb-small"><code>class Nastaveni {
+    // vlastnosti jsou uloženy na třídě, v instancích ne (přes ty k nim máme přístup)
+    // - ta podtržítka značí, že bychom neměli tyto vlastnosti používat zvenku třídy
+    // - (je to taková konvence, protože JavaScript nepodporuje zapouzdření)
+    static _sirka = 0;
+    static _vyska = 0;
+    static _barva = "žlutá";
+
+    // přístup ke statickým vlastnostem třídy máme přes
+    // instance pomocí těchto getterů a setterů
+    get sirka() { return Nastaveni._sirka; }
+    set sirka(value) { Nastaveni._sirka = value; }
+    get vyska() { return Nastaveni._vyska; }
+    set vyska(value) { Nastaveni._vyska = value; }
+    get barva() { return Nastaveni._barva; }
+    set barva(value) { Nastaveni._barva = value; }
+
+    toString() {
+        return `šířka: ${Nastaveni._sirka}; výška: ${Nastaveni._vyska}; barva: ${Nastaveni._barva}`;
+    }
+}
+
+
+// vytvoření instance třídy Nastaveni
+const instance1 = new Nastaveni();
+// změnění vlastností třídy Nastaveni pomocí instance
+instance1.sirka = 40;
+instance1.barva = "zelená";
+
+// vytvoření další instance třídy Nastaveni
+const instance2 = new Nastaveni();
+// změnění vlastností třídy Nastaveni pomocí instance
+instance2.sirka = 20;
+instance2.vyska = 60;
+
+// instance slouží jen k manipulaci vlastností třídy Nastaveni
+// - následující volání funkce toString bude mít stejný výstup
+console.log(instance1.toString());
+console.log(instance2.toString());</code></pre>
+                    <p class="paragraph u-mb-medium">Někdo je toho názoru že by se návrhový vzor Monostate neměl používat, ale tak záleží na nás.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Příklad - Singleton</h2>
+                    <p class="paragraph u-mb-small">U programovacích jazyků, které umožňují nastavit konstruktor jako privátní (aby se nemohl volat zvenku třídy) se Singleton implementuje tak, že se konstruktor nastaví jako privátní a instance třídy se potom získává pomocí metody k tomu určené. V JavaScriptu nic takového udělat nemůžeme, ale můžeme ovlivnit, jestli nám konstruktor vrátí nový objekt nebo nějaký jiný.</p>
+                    <p class="paragraph u-mb-small">Singleton vytvoříme tak, že v konstruktoru budeme kontrolovat, jestli je již instance třídy vytvořená a pokud ano tak ji vrátíme namísto nového objektu. Pokud ne, tak instanci (použijeme klíčové slovo this) uložíme jako vlastnost konstruktoru třídy abychom ji mohli později vracet. Konstruktor je objekt, jako skoro všechno v JavaScriptu.</p>
+                    <pre class="code-box u-mb-medium"><code>class Singleton {
+    constructor() {
+        // získání uložené instance
+        const instance = this.constructor.instance;
+
+        // pokud se instance našla (již jsme konstruktor v
+        // minulosti volali), tak se vrátí
+        if (instance) return instance;
+
+        // pokud se instance nenašla, tak se uloží
+        // objekt, který se momentálně vytváří (this)
+        this.constructor.instance = this;
+    }
+
+    nejakaMetoda() {
+        console.log("...");
+    }
+}
+
+const i1 = new Singleton();
+const i2 = new Singleton();
+
+// proměnná i1 a i2 odkazují na stejný objekt
+console.log("i1 je stejná instance jako i2: " + (i1 === i2));</code></pre>
+                    <h2 class="heading-secondary u-mb-tiny">Příklad - problémy Singletonu</h2>
+                    <p class="paragraph u-mb-small">Se Singletonem občas můžeme mít problémy například při testování našeho kódu. Následující ukázka ukazuje třídu MojeDatabaze (low level module), která je Singleton a třídu Vyhledavac (high level module), která s třídou MojeDatabaze pracuje. Pokud chceme třídu Vyhledavac otestovat, tak testujeme zároveň i třídu MojeDatabaze, protože ji třída Vyhledavac používá.</p>
+                    <pre class="code-box u-mb-small"><code>// LOW LEVEL MODULE
+// třída představující databázi - Singleton
+class MojeDatabaze {
+    constructor() {
+        const instance = this.constructor.instance;
+        if (instance) return instance;
+        this.constructor.instance = this;
+
+        // nějaká data uložená v databázi
+        this.mesta = {
+            "Praha": 1309000,
+            "Brno": 379526,
+            "Olomouc": 100408,
+            "Ostrava": 289629
+        }
+    }
+
+    vratPopulaci(mesto) {
+        return this.mesta[mesto];
+    }
+}
+
+
+// HIGH LEVEL MODULE
+// třída, která pracuje s třídou MojeDatabaze (Singletonem)
+class Vyhledavac {
+    celkovaPopulaceMest(mesta) {
+        return mesta.map(mesto => new MojeDatabaze().vratPopulaci(mesto))
+            .reduce((sum, p) => sum + p);
+    }
+}
+
+
+// testování třídy Vyhledavac pomocí Jasmine (https://jasmine.github.io/)
+describe("testování", function() {
+    // pokud budeme testovat třídu Vyhledavac, tak budeme pracovat přímo s třídou MojeDatabaze
+    it("výpočet celkové populace předaných měst", function() {
+        const vyhledavac = new Vyhledavac();
+        expect(vyhledavac.celkovaPopulaceMest(["Praha", "Olomouc"])).toEqual(1409408);
+    })
+});</code></pre>
+                    <p class="paragraph u-mb-small">Problém, který ukazuje předchozí ukázka můžeme vyřešit tím, že při vytváření instance třídy Vyhledavac budeme předávat, jaký objekt představující databázi chceme použít. Mohli bychom si tedy pro testování třídy Vyhledavac vytvořit falešnou databázi a tu použít namísto opravdové.</p>
+                    <pre class="code-box u-mb-medium"><code>class MojeDatabaze {
+    constructor() {
+        const instance = this.constructor.instance;
+        if (instance) return instance;
+        this.constructor.instance = this;
+
+        // nějaká data uložená v databázi
+        this.mesta = {
+            "Praha": 1309000,
+            "Brno": 379526,
+            "Olomouc": 100408,
+            "Ostrava": 289629
+        }
+    }
+
+    vratPopulaci(mesto) {
+        return this.mesta[mesto];
+    }
+}
+
+
+class Vyhledavac {
+    // při vytváření objektu teď musíme specifikovat,
+    // jaká databáze se má použít
+    constructor(databaze) {
+        this.databaze = databaze;
+    }
+
+    celkovaPopulaceMest(mesta) {
+        return mesta.map(mesto => this.databaze.vratPopulaci(mesto))
+            .reduce((sum, p) => sum + p);
+    }
+}
+
+
+// databáze pro testování
+class FakeDatabaze {
+    constructor() {
+        // nějaká data uložená v databázi
+        this.mesta = {
+            "Praha": 5,
+            "Brno": 2,
+            "Olomouc": 4,
+            "Ostrava": 7
+        }
+    }
+
+    vratPopulaci(mesto) {
+        return this.mesta[mesto];
+    }
+}
+
+
+// testování třídy Vyhledavac pomocí Jasmine (https://jasmine.github.io/)
+describe("testování", function() {
+    // pokud teď budeme testovat třídu Vyhledavac, tak můžeme použít falešnou databázi
+    it("výpočet celkové populace předaných měst", function() {
+        const vyhledavac = new Vyhledavac(new FakeDatabaze());
+        expect(vyhledavac.celkovaPopulaceMest(["Praha", "Olomouc"])).toEqual(9);
+    })
+});</code></pre>
+                    <div class="u-text-center">
+                        <a href="#" class="button-primary">pokračovat na další část</a>
+                    </div>
+                </div>
+                <div class="article-page__lateral-side">
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
