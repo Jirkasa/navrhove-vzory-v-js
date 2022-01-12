@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=yes maximum-scale=2.2 minimum-scale=1.0">
+    <title>Návrhové vzory v JS - Adapter</title>
+
+    <script src="../media/js/libraries/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+
+    <link rel="stylesheet" href="../media/css/style.css">
+</head>
+<body>
+    <div class="page">
+        <header class="header">
+            <div class="header__content">
+                <h2 class="header__title"><span>Návrhové vzory</span> v JS</h2>
+                <nav class="header__nav">
+                    <ul>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+        <div class="article-page">
+            <div class="article-page__content">
+                <div class="article-page__main-side">
+                    <h1 class="heading-primary u-mb-small">Adapter</h1>
+                    <hr class="horizontal-rule u-mb-small">
+                    <p class="paragraph u-mb-medium">Tato část je o návrhovém vzoru Adapter. Tento návrhový vzor můžeme použít k adaptování nějakého existujícího rozhraní třídy na jiné.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Proč Adapter použít</h2>
+                    <p class="paragraph u-mb-small">Pokud potřebujeme z nějakého důvodu předělat rozhraní nějaké třídy, kterou již někde v našem kódu používáme, tak ji nemusíme přepisovat. Můžeme si pro ni vytvořit Adapter, ve kterém si pro ni vytvoříme nové rozhraní.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Příklad - Vytvoření nového rozhraní</h2>
+                    <p class="paragraph u-mb-small">Následující ukázka ukazuje třídu Kalkulacka, která obsahuje jednu metodu pro provedení početní operace mezi dvěma čísly. Tato metoda bere 3 parametry. První dva představují čísla se kterými se má pracovat a třetí určuje operaci, která se má provést.</p>
+                    <pre class="code-box u-mb-small"><code>const Operace = Object.freeze({
+    scitani: 0,
+    odcitani: 1,
+    nasobeni: 2,
+    deleni: 3
+});
+
+class Kalkulacka {
+    spocitej(cislo1, cislo2, operace) {
+        switch (operace) {
+            case Operace.scitani:
+                return cislo1 + cislo2;
+            case Operace.odcitani:
+                return cislo1 - cislo2;
+            case Operace.nasobeni:
+                return cislo1 * cislo2;
+            case Operace.deleni:
+                return cislo1 / cislo2;
+        }
+    }
+}
+
+
+const kalkulacka = new Kalkulacka();
+const vysledek = kalkulacka.spocitej(5, 2, Operace.odcitani);
+console.log(vysledek);</code></pre>
+                    <p class="paragraph u-mb-small">Teď si představme že chceme třídu Kalkulacka z minulé části refaktorizovat. Namísto jedné metody pro ni vytvoříme metody pro jednotlivé početní operace. Následující ukázka předělanou třídu Kalkulacka ukazuje.</p>
+                    <pre class="code-box u-mb-small"><code>class Kalkulacka {
+    secti(cislo1, cislo2) {
+        return cislo1 + cislo2;
+    }
+
+    odecti(cislo1, cislo2) {
+        return cislo1 - cislo2;
+    }
+
+    vynasob(cislo1, cislo2) {
+        return cislo1 * cislo2;
+    }
+
+    vydel(cislo1, cislo2) {
+        return cislo1 - cislo2;
+    }
+}
+
+
+const kalkulacka = new Kalkulacka();
+
+// - třída Kalkulacka již metodu spocitej neobsahuje
+// const vysledek = kalkulacka.spocitej(5, 2, Operace.odcitani);</code></pre>
+                    <p class="paragraph u-mb-small">Po refaktorizaci třídy Kalkulacka již nemáme k dispozici metodu spocitej. Pokud ji tedy v našem kódu někde používáme, náše aplikace přestane fungovat. To můžeme vyřešit tak, že kód který jsme dříve napsali přepíšeme, nebo pro něj vytvoříme Adapter. Následující ukázka ukazuje, jak můžeme pro třídu Kalkulacka vytvořit Adapter.</p>
+                    <pre class="code-box u-mb-medium"><code>const Operace = Object.freeze({
+    scitani: 0,
+    odcitani: 1,
+    nasobeni: 2,
+    deleni: 3
+});
+
+class Kalkulacka {
+    secti(cislo1, cislo2) {
+        return cislo1 + cislo2;
+    }
+
+    odecti(cislo1, cislo2) {
+        return cislo1 - cislo2;
+    }
+
+    vynasob(cislo1, cislo2) {
+        return cislo1 * cislo2;
+    }
+
+    vydel(cislo1, cislo2) {
+        return cislo1 - cislo2;
+    }
+}
+
+// Adapter pro třídu Kalkulacka
+class KalkulackaAdapter {
+    constructor() {
+        this.kalkulacka = new Kalkulacka();
+    }
+
+    // rozhraní, které můžeme použít namísto rozhraní, které má třída Kalkulacka
+    spocitej(cislo1, cislo2, operace) {
+        switch (operace) {
+            case Operace.scitani:
+                return this.kalkulacka.secti(cislo1, cislo2);
+            case Operace.odcitani:
+                return this.kalkulacka.odecti(cislo1, cislo2);
+            case Operace.nasobeni:
+                return this.kalkulacka.vynasob(cislo1, cislo2);
+            case Operace.deleni:
+                return this.kalkulacka.vydel(cislo1, cislo2);
+        }
+    }
+}
+
+
+const kalkulacka = new KalkulackaAdapter();
+// díky Adapteru můžeme používat jiné rozhraní než má třída Kalkulacka
+const vysledek = kalkulacka.spocitej(5, 2, Operace.odcitani);
+console.log(vysledek);</code></pre>
+                    <div class="u-text-center">
+                        <a href="#" class="button-primary">pokračovat na další část</a>
+                    </div>
+                </div>
+                <div class="article-page__lateral-side">
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
