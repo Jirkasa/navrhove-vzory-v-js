@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=yes maximum-scale=2.2 minimum-scale=1.0">
+    <title>Návrhové vzory v JS - Bridge</title>
+
+    <script src="../media/js/libraries/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+
+    <link rel="stylesheet" href="../media/css/style.css">
+</head>
+<body>
+    <div class="page">
+        <header class="header">
+            <div class="header__content">
+                <h2 class="header__title"><span>Návrhové vzory</span> v JS</h2>
+                <nav class="header__nav">
+                    <ul>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+        <div class="article-page">
+            <div class="article-page__content">
+                <div class="article-page__main-side">
+                    <h1 class="heading-primary u-mb-small">Bridge</h1>
+                    <hr class="horizontal-rule u-mb-small">
+                    <p class="paragraph u-mb-medium">V této části se podíváme na návrhový vzor Bridge. Tento návrhový vzor můžeme použít k propojení různých komponent.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Proč Bridge použít</h2>
+                    <p class="paragraph u-mb-small">Bridge spočívá v tom, že při vytváření objektu mu jako vlastnost nastavíme jiný objekt. Objekt tedy bude mít k objektu spojení (odtud název Bridge - Most) a může s ním pracovat.</p>
+                    <p class="paragraph u-mb-medium">Díky návrhovému vzoru Bridge nemusíme přidávat funkcionalitu pomocí dědění tříd, ale můžeme třídě jako vlastnost předávat nějaký objekt, který požadovanou funkcionalitu poskytuje.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Příklad - Vykreslování objektů různými renderery</h2>
+                    <p class="paragraph u-mb-small">Představme si, že vytváříme nějakou aplikaci, ve které se vykreslují různé geometrické objekty. V této aplikaci chceme objekty vykreslovat dvěma odlišnými způsoby: rastrově a vektorově. Následující ukázka ukazuje, jak bychom mohli vykreslování objektů oběma způsoby umožnit. V ukázce se nachází třída Kruh od které dědí třídy RasterKruh a VectorKruh. Třída RasterKruh slouží pro reprezentaci a vykreslování kruhu rastrovaně a třída VectorKruh vektrově.</p>
+                    <pre class="code-box u-mb-small"><code>class Kruh {
+    constructor(x, y, polomer) {
+        this.x = x;
+        this.y = y;
+        this.polomer = polomer;
+    }
+}
+
+// třída pro kruh, který se má vykreslovat rastrovaně
+class RasterKruh extends Kruh {
+    constructor(x, y, polomer) {
+        super(x, y, polomer);
+    }
+
+    // metoda pro vykreslení kruhu rastrovaně
+    vykresli() {
+        console.log(`Vykresluji RASTROVĚ kruh s poloměrem ${this.polomer}` +
+            ` na souřadnicích [${this.x}, ${this.y}].`);
+    }
+}
+
+// třída pro kruh, který se má vykreslovat vektorově
+class VektorKruh extends Kruh {
+    constructor(x, y, polomer) {
+        super(x, y, polomer);
+    }
+
+    // metoda pro vykreslení kruhu vektorově
+    vykresli() {
+        console.log(`Vykresluji VEKTOROVĚ kruh s poloměrem ${this.polomer}` +
+            ` na souřadnicích [${this.x}, ${this.y}].`);
+    }
+}
+
+
+const kruh = new RasterKruh(5, 8, 14);
+kruh.vykresli();</code></pre>
+                    <p class="paragraph u-mb-small">Pokud nechceme pro každý objekt, který v aplikaci vykreslujeme, vytvářet třídu pro jeho vykreslování rastrovaně a vektorově, tak si pro vykreslování můžeme vytvořit speciální komponentu. Následující ukázka ukazuje třídu RasterRenderer, která slouží pro vykreslování objektů rastrovaně a třídu VectorRenderer, která slouží k vektorovému vykreslování objektů. Namísto dvou tříd pro každý objekt tedy máme jen jednu a při vytváření její instance jen předáváme, který renderer chceme pro vykreslování použít.</p>
+                    <pre class="code-box u-mb-medium"><code>// renderer pro rastrové vykreslování objektů
+class RasterRenderer {
+    vykresliKruh(x, y, polomer) {
+        console.log(`Vykresluji RASTROVĚ kruh s poloměrem ${polomer}` +
+            ` na souřadnicích [${x}, ${y}].`);
+    }
+}
+
+// renderer pro vektorové vykreslování objektů
+class VectorRenderer {
+    vykresliKruh(x, y, polomer) {
+        console.log(`Vykresluji VEKTOROVĚ kruh s poloměrem ${polomer}` +
+            ` na souřadnicích [${x}, ${y}].`);
+    }
+}
+
+
+// základní třída pro všechny tvary, které se v aplikaci vykreslují
+class Tvar {
+    // zde vlastně Bridge probíhá
+    // - odkaz na renderer se uloží jako vlastnost objektu
+    constructor(renderer) {
+        this.renderer = renderer;
+    }
+}
+
+class Kruh extends Tvar {
+    constructor(renderer, x, y, polomer) {
+        super(renderer);
+        this.x = x;
+        this.y = y;
+        this.polomer = polomer;
+    }
+
+    vykresli() {
+        // o vykreslení kruhu se postará nastavený renderer
+        this.renderer.vykresliKruh(this.x, this.y, this.polomer);
+    }
+}
+
+const renderer = new RasterRenderer();
+// při vytváření objektu se předává renderer, který se má použít pro vykreslování
+const kruh = new Kruh(renderer, 5, 8, 14);
+kruh.vykresli();</code></pre>
+                    <div class="u-text-center">
+                        <a href="#" class="button-primary">pokračovat na další část</a>
+                    </div>
+                </div>
+                <div class="article-page__lateral-side">
+                    <div class="article-page__sticky-content">
+                        <h2 class="heading-secondary u-mb-small">Části Tutoriálu</h2>
+                        <nav class="navigation">
+                            <ul>
+                                <li class="navigation__group">
+                                    <ul>
+                                        <li><a class="navigation__link" href="../navrhove-principy/">Návrhové principy</a></li>
+                                    </ul>
+                                </li>
+                                <li class="navigation__group">Creational
+                                    <ul>
+                                        <li><a class="navigation__link" href="../builder/">Builder</a></li>
+                                        <li><a class="navigation__link" href="../factory/">Factory</a></li>
+                                        <li><a class="navigation__link" href="../prototype/">Prototype</a></li>
+                                        <li><a class="navigation__link" href="../singleton/">Singleton</a></li>
+                                    </ul>
+                                </li>
+                                <li class="navigation__group">Structural
+                                    <ul>
+                                        <li><a class="navigation__link" href="../adapter/">Adapter</a></li>
+                                        <li><a class="navigation__link navigation__link--active" href="../bridge/">Bridge</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
