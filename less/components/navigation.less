@@ -1,0 +1,74 @@
+.navigation {
+    ul {
+        list-style: none;
+    }
+
+    > ul > li {
+        &:not(:last-child) {
+            margin-bottom: .5rem;
+        }
+    }
+
+    &__group {
+        font-size: 1.9rem;
+        font-weight: 600;
+
+        background-color: lighten(@colors[primary], 15%);
+        border-radius: .5rem;
+        color: @colors[dark-grey];
+        text-transform: uppercase;
+        
+        padding: .5rem 1rem;
+        padding-bottom: 1rem;
+
+        ul {
+            padding-top: .5rem;
+            text-transform: none;
+        }
+
+        ul > li {
+            &:not(:last-child) {
+                margin-bottom: .5rem;
+            }
+        }
+    }
+
+    &__link {
+        &:link, &:visited {
+            display: block;
+            font-size: 1.6rem;
+            font-weight: normal;
+
+            color: @colors[white];
+            text-decoration: none;
+            background-color: @colors[primary];
+            border: .2rem solid darken(@colors[primary], 10%);
+            border-radius: .5rem;
+
+            padding: .4rem .6rem;
+
+            transition: all .1s;
+        }
+
+        &:hover, &--active:link, &--active:visited {
+            background-color: darken(@colors[primary], 10%);
+        }
+
+        &--active {
+            &::before {
+                display: inline-block;
+                content: " ";
+
+                width: 1rem;
+                height: 1rem;
+                margin-right: .5rem;
+
+                // background-color: lighten(@colors[primary], 30%);
+                background-color: #8ee845;
+                border-radius: 50%;
+
+                clip-path: polygon(60% 50%, 0 20%, 0 0, 100% 40%, 100% 60%, 0 100%, 0 80%);
+            }
+        }
+    }
+}

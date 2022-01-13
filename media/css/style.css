@@ -305,6 +305,57 @@ code.hljs {
 .button-primary:active {
   background-color: #c81919;
 }
+.navigation ul {
+  list-style: none;
+}
+.navigation > ul > li:not(:last-child) {
+  margin-bottom: 0.5rem;
+}
+.navigation__group {
+  font-size: 1.9rem;
+  font-weight: 600;
+  background-color: #f08989;
+  border-radius: 0.5rem;
+  color: #2d3033;
+  text-transform: uppercase;
+  padding: 0.5rem 1rem;
+  padding-bottom: 1rem;
+}
+.navigation__group ul {
+  padding-top: 0.5rem;
+  text-transform: none;
+}
+.navigation__group ul > li:not(:last-child) {
+  margin-bottom: 0.5rem;
+}
+.navigation__link:link,
+.navigation__link:visited {
+  display: block;
+  font-size: 1.6rem;
+  font-weight: normal;
+  color: #fff;
+  text-decoration: none;
+  background-color: #e84545;
+  border: 0.2rem solid #de1c1c;
+  border-radius: 0.5rem;
+  padding: 0.4rem 0.6rem;
+  transition: all 0.1s;
+}
+.navigation__link:hover,
+.navigation__link--active:link,
+.navigation__link--active:visited {
+  background-color: #de1c1c;
+}
+.navigation__link--active::before {
+  display: inline-block;
+  content: " ";
+  width: 1rem;
+  height: 1rem;
+  margin-right: 0.5rem;
+  background-color: #8ee845;
+  border-radius: 50%;
+  clip-path: polygon(60% 50%, 0 20%, 0 0, 100% 40%, 100% 60%, 0 100%, 0 80%);
+}
 .article-page {
   padding: 4rem 3rem;
 }
@@ -321,4 +372,9 @@ code.hljs {
 .article-page__lateral-side {
   flex: 0 0 30rem;
   padding-left: 3rem;
+}
+.article-page__sticky-content {
+  position: sticky;
+  top: 0;
+  padding: 1rem 0;
 }
