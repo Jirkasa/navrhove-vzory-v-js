@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=yes maximum-scale=2.2 minimum-scale=1.0">
+    <title>Návrhové vzory v JS - Composite</title>
+
+    <script src="../media/js/libraries/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+
+    <link rel="stylesheet" href="../media/css/style.css">
+</head>
+<body>
+    <div class="page">
+        <header class="header">
+            <div class="header__content">
+                <h2 class="header__title"><span>Návrhové vzory</span> v JS</h2>
+                <nav class="header__nav">
+                    <ul>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+        <div class="article-page">
+            <div class="article-page__content">
+                <div class="article-page__main-side">
+                    <h1 class="heading-primary u-mb-small">Composite</h1>
+                    <hr class="horizontal-rule u-mb-small">
+                    <p class="paragraph u-mb-medium">V této části si ukážeme návrhový vzor Composite. Cílem tohoto návrhového vzoru je, aby se s kolekcí objektů pracovalo stejným způsobem jako se samotným objektem.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Proč Composite použít</h2>
+                    <p class="paragraph u-mb-small">Návrhový vzor Composite je o tom, že se s kolekcí objektů pracuje stejným způsobem jako s jedním objektem. Pro jeho implementaci se objekty většinou skládají do nějaké stromové struktury.</p>
+                    <p class="paragraph u-mb-medium">Composite se tedy hodí, když chceme se skupinou objektů pracovat stejně jako s jedním objektem.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Příklad - Grafický objekt</h2>
+                    <p class="paragraph u-mb-small">Následující ukázka ukazuje třídu GrafickyObjekt a její podtřídy Kruh a Ctverec. Všechny tyto třídy představují grafický objekt, který může obsahovat jiné grafické objekty. S kolekcí grafických objektů (grafickým objektem skládajícím se z více grafických objektů) můžeme pracovat stejným způsobem jako s jedním grafickým objektem. Přesně tuto vlastnost návrhový vzor Composite představuje.</p>
+                    <pre class="code-box u-mb-medium"><code>// třída pro grafický objekt
+class GrafickyObjekt {
+    static pocet = 0;
+
+    constructor(nazev="Skupina " + GrafickyObjekt.pocet++) {
+        // grafický objekt se může skládat z více grafických objektů
+        this.potomci = [];
+        this.barva = undefined;
+        this.nazev = nazev;
+    }
+
+    // pomocná metoda pro získání textové reprezentace objektu
+    print(buffer, odsazeni) {
+        // vložení odsazení
+        buffer.push("*".repeat(odsazeni));
+        if (odsazeni > 0) buffer.push(" ");
+        // vložení barvy objektu
+        if (this.barva) buffer.push(`[${this.barva}] `);
+        // vložení jména objektu
+        buffer.push(this.nazev);
+        // vložení nového řádku
+        buffer.push("\n");
+
+        // zavolání metody print na všechny potomky
+        for (let potomek of this.potomci)
+            potomek.print(buffer, odsazeni+1);
+    }
+
+    // metoda pro získání textové reprezentace objektu
+    toString() {
+        const buffer = [];
+        // objekty (tedy i pole) se předávají adresou
+        // - metoda print pracuje přímo s předaným polem
+        this.print(buffer, 0);
+        return buffer.join("");
+    }
+}
+
+class Kruh extends GrafickyObjekt {
+    constructor(barva) {
+        super("Kruh");
+        this.barva = barva;
+    }
+}
+
+class Ctverec extends GrafickyObjekt {
+    constructor(barva) {
+        super("Čtverec");
+        this.barva = barva;
+    }
+}
+
+
+// vytvoření grafického objektu kresba
+const kresba = new GrafickyObjekt();
+// přidání kruhu a čtverce (grafických objektů) do kresby
+kresba.potomci.push(new Kruh("žlutá"));
+kresba.potomci.push(new Ctverec("zelená"));
+
+// vytvoření grafického objektu skupina
+const skupina = new GrafickyObjekt();
+// přidání grafických objektů do skupiny
+skupina.potomci.push(new Ctverec("modrá"));
+skupina.potomci.push(new Kruh("fialová"));
+// přidání skupiny do kresby
+kresba.potomci.push(skupina);
+
+// všimněte si, že se všemi grafickými objekty pracujeme stejným způsobem
+
+// vypsání struktury grafického objektu
+console.log(kresba.toString());
+// vypíše se:
+// Skupina 0
+// * [žlutá] Kruh
+// * [zelená] Čtverec
+// * Skupina 1
+// ** [modrá] Čtverec
+// ** [fialová] Kruh</code></pre>
+                    <div class="u-text-center">
+                        <a href="#" class="button-primary">pokračovat na další část</a>
+                    </div>
+                </div>
+                <div class="article-page__lateral-side">
+                    <div class="article-page__sticky-content">
+                        <h2 class="heading-secondary u-mb-small">Části Tutoriálu</h2>
+                        <nav class="navigation">
+                            <ul>
+                                <li class="navigation__group">
+                                    <ul>
+                                        <li><a class="navigation__link" href="../navrhove-principy/">Návrhové principy</a></li>
+                                    </ul>
+                                </li>
+                                <li class="navigation__group">Creational
+                                    <ul>
+                                        <li><a class="navigation__link" href="../builder/">Builder</a></li>
+                                        <li><a class="navigation__link" href="../factory/">Factory</a></li>
+                                        <li><a class="navigation__link" href="../prototype/">Prototype</a></li>
+                                        <li><a class="navigation__link" href="../singleton/">Singleton</a></li>
+                                    </ul>
+                                </li>
+                                <li class="navigation__group">Structural
+                                    <ul>
+                                        <li><a class="navigation__link" href="../adapter/">Adapter</a></li>
+                                        <li><a class="navigation__link" href="../bridge/">Bridge</a></li>
+                                        <li><a class="navigation__link navigation__link--active" href="../composite/">Composite</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
