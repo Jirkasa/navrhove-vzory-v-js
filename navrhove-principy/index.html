@@ -32,7 +32,7 @@
                     <hr class="horizontal-rule u-mb-small">
                     <p class="paragraph u-mb-small">V první části tohoto tutoriálu o návrhových vzorech v JavaScriptu se dozvíte o různých principech pro návrh softwaru. Na konkrétní návrhové vzory se zaměřují až další části.</p>
                     <p class="paragraph u-mb-medium">Návrhové principy jsou pravidla, která nám pomáhají lépe navrhovat software. Je jich více a nejdůležitější jsou pravděpodobně SOLID návrhové principy.</p>
-                    <h2 class="heading-secondary u-mb-tiny">SOLID</h2>
+                    <h2 id="navrhove-principy-solid" class="heading-secondary u-mb-tiny">SOLID</h2>
                     <p class="paragraph u-mb-small">Návrhové principy SOLID představují 5 principů pro objektově orientovaný vývoj softwaru, které byly představeny <a href="https://en.wikipedia.org/wiki/Robert_C._Martin" target="_blank" class="anchor">Robertem C. Martinem</a>. Název SOLID je akronymem pro tyto klíčové návrhové principy:</p>
                     <ul class="unordered-list unordered-list--highlight-first-letter u-mb-medium">
                         <li>Single Responsibility Principle (princip jedné odpovědnosti)</li>
@@ -41,7 +41,7 @@
                         <li>Interface Segregation Principle (princip oddělení rozhraní)</li>
                         <li>Dependency Inversion Principle (princip obrácení závislostí)</li>
                     </ul>
-                    <h3 class="heading-tertiary u-mb-tiny">Princip jedné odpovědnosti</h3>
+                    <h3 id="princip-jedne-odpovednosti" class="heading-tertiary u-mb-tiny">Princip jedné odpovědnosti</h3>
                     <p class="paragraph u-mb-small">Tento princip je o tom, že by každá třída měla mít jen jednu odpovědnost. Dodržování tohoto pravidla znamená, že by naše třídy měly dělat jen jednu věc a zodpovídat pouze za jednu část funkčnosti softwaru.</p>
                     <p class="paragraph u-mb-small">Následující ukázka kódu ukazuje třídu, která reprezentuje uživatele. Ukládá jeho jméno, příjmení a email. S těmito údaji potom pracuje ve svých metodách. Email se navíc ještě ověřuje.</p>
                     <pre class="code-box u-mb-small"><code>class Uzivatel {
@@ -118,7 +118,7 @@ class Email {
 const uzivatel = new Uzivatel("Karel", "Omáčka", new Email("omacka123@gmail.com"));
 uzivatel.predstavSe();
 uzivatel.pozdrav();</code></pre>
-                    <h3 class="heading-tertiary u-mb-tiny">Princip otevřenosti a uzavřenosti</h3>
+                    <h3 id="princip-otevrenosti-a-uzavrenosti" class="heading-tertiary u-mb-tiny">Princip otevřenosti a uzavřenosti</h3>
                     <p class="paragraph u-mb-small">Tento princip se týká toho, že by třídy měly být otevřeny pro rozšiřování, ale uzavřené pro změny. Pokud tedy chceme přidat nějakou novou funkcionalitu do již dobře odladěné třídy, tak bychom ji namísto její modifikace měli jen rozšířit. Modifikací třídy bychom totiž mohli způsobit problémy v částech aplikace, kde se třída již používá.</p>
                     <p class="paragraph u-mb-small">Následující ukázka kódu ukazuje třídu ProduktFilter, která slouží k filtrování polí s produkty. Třída obsahuje metody, které nám umožňují produkty filtrovat podle barvy nebo velikosti.</p>
                     <pre class="code-box u-mb-small"><code>// enum pro barvu (metoda Object.freeze zmrazí předaný objekt - jeho vlastnosti již nemohou být změněny)
@@ -245,7 +245,7 @@ const spec = new HromadnaSpecifikace(
     new SpecifikaceVelikosti(Velikost.stredni)
 );
 console.log(produktFilter.filtruj(produkty, spec));</code></pre>
-                    <h3 class="heading-tertiary u-mb-tiny">Liskovové princip zaměnitelnosti</h3>
+                    <h3 id="liskovove-princip-zamenitelnosti" class="heading-tertiary u-mb-tiny">Liskovové princip zaměnitelnosti</h3>
                     <p class="paragraph u-mb-small">Tento princip je o tom, že by se s podtřídami mělo dát pracovat stejně jako s jejich nadtřídami bez rozbití aplikace. Pokud nějaký kód používá základní třídu, tak by měl fungovat správně i když dostane namísto základní třídy její podtřídu.</p>
                     <p class="paragraph u-mb-small">Následující ukázka kódu ukazuje třídu Obdelnik a její podtřídu Ctverec. S instancemi těchto tříd pracuje funkce pouzijTo, která nastavuje výšku obdelníku a vypíše jeho obsah. Pokud ale funkci pouzijTo předáme namísto obdelníku čtverec, tak se obsah nevypíše správně. Takže je porušen Liskovové princip zaměnitelnosti, protože s podtřídou nejde pracovat stejně jako s nadtřídou.</p>
                     <pre class="code-box u-mb-medium"><code>// třída pro reprezentaci obdelníku
@@ -307,7 +307,7 @@ pouzijTo(obdelnik);
 
 // s instancí podtřídy Ctverec nebude funkce pracovat správně
 pouzijTo(ctverec);</code></pre>
-                    <h3 class="heading-tertiary u-mb-tiny">Princip oddělení rozhraní</h3>
+                    <h3 id="princip-oddeleni-odpovednosti" class="heading-tertiary u-mb-tiny">Princip oddělení rozhraní</h3>
                     <p class="paragraph u-mb-small">Tento princip se týká toho, že více speciálních rozhraní, je lepší než jedno univerzální. Pokud máme jedno velké rozhraní, tak můžeme ztrácet přehled o tom, které části rozhraní naše třídy používají.</p>
                     <p class="paragraph u-mb-small">JavaScript sice rozhraní nemá, ale můžeme si pro ukázku takové provizorní vytvořit jako třídu. Následující ukázka ukazuje rozhraní Stroj, které definuje metody pro tisknutí a skenování dokumentu. Také ukazuje dvě třídy, které toto rozhraní implementují.</p>
                     <pre class="code-box u-mb-small"><code>// v JavaScriptu rozhraní nejsou, takže si pro ukázku vytvoříme jen takové provizorní
@@ -412,7 +412,7 @@ class Kopirka extends aggregation(Tiskarna, Skener) {
 }</code></pre>
                     <p class="paragraph u-mb-small">Předchozí ukázka rozdělila rozhraní Stroj na rozraní Tiskarna a Skener, takže pokud chceme vytvořit třídu implementující metody tiskni i skenuj, tak musíme implementovat obě tyto rozhraní. Pokud chceme vytvořit třídu implementující jen metodu tiskni, tak stačí implementovat jen rozhraní Tiskarna. Je však důležité nezacházet do extrémů. Rozhraní by měla obsahovat metody, které se často používají nebo mohou používat současně.</p>
                     <p class="paragraph u-mb-medium">Protože JavaScript rozhraní nemá, tak se ho tento princip tolik netýká. Je více relevantní v jiných programovacích jazycích. Tvorba provizorního rozhraní, které předchozí dvě ukázky ukazují, nemá žádné výhody. JavaScript nám nepřikáže že máme metody rozhraní implementovat a IDE nám je podle něj ani nevygeneruje.</p>
-                    <h3 class="heading-tertiary u-mb-tiny">Princip obrácení závislostí</h3>
+                    <h3 id="princip-obraceni-zavislosti" class="heading-tertiary u-mb-tiny">Princip obrácení závislostí</h3>
                     <p class="paragraph u-mb-small">Tento princip je o tom, že by high level moduly neměly být vázány na low level moduly.</p>
                     <p class="paragraph u-mb-small">V následující ukázce se nachází třída Vztahy, která slouží k ukládání vztahů mezi lidmi. Tato třída představuje low level module. Také se tam nachází třída Pruzkum, která používá data, uložená ve třídě Vztahy a provádí s nimi menší průzkum. Třída Pruzkum představuje high level module.</p>
                     <pre class="code-box u-mb-small"><code>const Vztah = Object.freeze({
@@ -549,7 +549,7 @@ vztahy.pridejRodiceADite(rodic, dite2);
 
 // high level module
 new Pruzkum(vztahy);</code></pre>
-                    <h2 class="heading-secondary u-mb-tiny">DRY (Don't Repeat Yourself)</h2>
+                    <h2 id="navrhovy-princip-dry" class="heading-secondary u-mb-tiny">DRY (Don't Repeat Yourself)</h2>
                     <p class="paragraph u-mb-small">DRY je princip, který je zaměřený na redukci opakování stejného kódu na více místech. DRY je zkratkou pro Don't Repeat Yourself, což v češtině znamená 'neopakuj se'. Měli bychom se tedy snažit psát kód tak, abychom nepoužívali na více místech stejný nebo podobný kód.</p>
                     <p class="paragraph u-mb-small">Následující ukázka ukazuje funkci, která slouží k provedení výpočtu mezi dvěma čísly a vypsání výsledku do konzole.</p>
                     <pre class="code-box u-mb-small"><code>function spocitejAVypis(cislo1, cislo2, operace) {
@@ -607,7 +607,7 @@ spocitejAVypis(2, 4, "scitani");</code></pre>
 }
 
 spocitejAVypis(2, 4, "scitani");</code></pre>
-                    <h2 class="heading-secondary u-mb-tiny">KISS (Keep it simple, Stupid!)</h2>
+                    <h2 id="navrhovy-princip-kiss" class="heading-secondary u-mb-tiny">KISS (Keep it simple, Stupid!)</h2>
                     <p class="paragraph u-mb-small">Název KISS je zkratkou pro 'Keep it simple, Stupid!'. V češtině to znamená 'Nech to jednoduché, Hloupé!'. Tento princip je tedy o tom, že bychom se měli snažit psát jednoduchý kód.</p>
                     <p class="paragraph u-mb-small">Následující kód ukazuje, jak můžeme například zjednodušit vypsaní hodnoty proměnné do konzole s podmínkou že když proměnná neobsahuje žádnou hodnotu, tak se vypíše, že proměnná hodnotu neobsahuje.</p>
                     <pre class="code-box u-mb-small"><code>// použití podmínek
@@ -627,7 +627,7 @@ function secti1(c1, c2) {
 
 // arrow funkce pro sečtení dvou čísel pomocí
 const secti2 = (c1, c2) => c1 + c2;</code></pre>
-                    <h2 class="heading-secondary u-mb-tiny">YAGNI (You ain't gonna need it)</h2>
+                    <h2 id="navrhovy-princip-yagni" class="heading-secondary u-mb-tiny">YAGNI (You ain't gonna need it)</h2>
                     <p class="paragraph u-mb-medium">Myšlenkou tohoto principu je, že bychom neměli přidávat funkcionalitu, dokud ji nepotřebujeme. Neměli bychom tedy do naší aplikace přidávat nějakou funkci, kdybychom ji náhodou někdy v budoucnu potřebovali.</p>
                     <p class="paragraph u-mb-medium">Návrhové principy, o kterých jste se v této části dozvěděli, dodržujte jen do míry, do jaké vám pomáhají psát lepší kód. Není potřeba je vždy dodržovat za každou cenu, záleží na vás.</p>
                     <div class="u-text-center">
@@ -657,6 +657,7 @@ const secti2 = (c1, c2) => c1 + c2;</code></pre>
                                         <li><a class="navigation__link" href="../adapter/">Adapter</a></li>
                                         <li><a class="navigation__link" href="../bridge/">Bridge</a></li>
                                         <li><a class="navigation__link" href="../composite/">Composite</a></li>
+                                        <li><a class="navigation__link" href="../decorator/">Decorator</a></li>
                                     </ul>
                                 </li>
                             </ul>
