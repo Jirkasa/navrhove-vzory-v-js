@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=yes maximum-scale=2.2 minimum-scale=1.0">
+    <title>Návrhové vzory v JS - Chain of responsibility</title>
+
+    <script src="../media/js/libraries/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+
+    <link rel="stylesheet" href="../media/css/style.css">
+</head>
+<body>
+    <div class="page">
+        <header class="header">
+            <div class="header__content">
+                <h2 class="header__title"><span>Návrhové vzory</span> v JS</h2>
+                <nav class="header__nav">
+                    <ul>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+        <div class="article-page">
+            <div class="article-page__content">
+                <div class="article-page__main-side">
+                    <h1 class="heading-primary u-mb-small">Chain of responsibility</h1>
+                    <hr class="horizontal-rule u-mb-small">
+                    <p class="paragraph u-mb-medium">V této části se podíváme na Chain of responsibility. Tento návrhový vzor je o tom, že máme například řetězec nějakých objektů a po tomto řetězci třeba posíláme nějaký příkaz, který všechny objekty v řetězci mohou vykonat.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Proč Chain of responsibility použít</h2>
+                    <p class="paragraph u-mb-small">Chain of responsibility můžeme chtít třeba použít, když chceme mít oddělenou třídu, která posílá nějaký požadavek, a třídu, která jej zpracovává. Pěkně dlouho mi trvalo, než jsem napsal tuto jedinou větu, která vám pravděpodobně nic neříká. Na příkladu snad uvidíte lépe kdy se tento návrhový vzor hodí použít.</p>
+                    <p class="paragraph u-mb-medium">V JavaScriptu se s Chain of responsibility můžeme setkat u eventů. Když nastavíme nějakému elementu event listener pro jeho kliknutí a klikneme na něj, tak probíhají 3 fáze. Nejprve proběhne Capturing fáze a při té event putuje od root elementu k elementu na který jsme klikli. Poté proběhne Target fáze, a to znamená že se zavolá funkce, kterou jsme nastavili při přidávání event listeneru. Nakonec proběhne Bubbling fáze ve které event putuje zpět k root elementu. Pokud se při této fázi narazí na elementy, které mají také přiřazený event listener se stejným typem eventu, tak se pro ně také zavolá funkce, kterou mají přiřazenou. To jestli volání funkcí ostatních elementů proběhne při Capturing nebo Bubbling fázi se dá nastavit při přidávání event listeneru. Pokud chceme Capturing nebo Bubbling fázi zastavit, tak můžeme použít metodu event.stopPropagation, pomocí které propagaci eventu ukončíme.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Příklad - Řetězení modifikátorů</h2>
+                    <p class="paragraph u-mb-small">Následující ukázka ukazuje třídu Nestvura, která představuje nestvůru například v nějaké hře. Dále také ukazuje třídu ModifikatorNestvury a její podtřídy ZdvojenyUtokModifikator, ZdvojenaObranaModifikator a ZadnyBonusModifikator. Tyto třídy představují modifikátory, které můžeme na nestvůru aplikovat. Modifikátory si v ukázce můžeme zřetězit, a vzniklý řetězec modifikátorů na nestvůru aplikovat.</p>
+                    <pre class="code-box u-mb-small"><code>class Nestvura {
+    constructor(jmeno, utok, obrana) {
+        this.jmeno = jmeno;
+        this.utok = utok;
+        this.obrana = obrana;
+    }
+
+    toString() {
+        return `${this.jmeno} [útok: ${this.utok}, obrana: ${this.obrana}]`;
+    }
+}
+
+// základní třída pro modifikátory, které se mohou aplikovat
+// na nestvůru vytvořenou pomocí třídy Nestvura
+class ModifikatorNestvury {
+    constructor(nestvura) {
+        this.nestvura = nestvura;
+        // odkaz na další modifikátor v řetězci modifikátorů
+        this.dalsi = null;
+    }
+
+    // metoda pro přidání modifikátoru do řetězce modifikátorů
+    pridej(modifikator) {
+        if (this.dalsi) this.dalsi.pridej(modifikator);
+        else this.dalsi = modifikator;
+    }
+
+    // metoda pro provedení modifikátoru
+    // - metoda proved základní třídy jen zavolá metodu proved dalšího modifikátoru v řetězci
+    proved() {
+        if (this.dalsi) this.dalsi.proved();
+    }
+}
+
+// modifikátor pro zdvojení útoku nestvůry
+class ZdvojenyUtokModifikator extends ModifikatorNestvury {
+    constructor(nestvura) {
+        super(nestvura);
+    }
+
+    proved() {
+        console.log(`Zdvojuji útok nestvůry ${this.nestvura.jmeno}.`)
+        this.nestvura.utok *= 2;
+        // zavolání metody proved nadtřídy pro provedení
+        // metody proved dalšího objektu v řetězci
+        super.proved();
+    }
+}
+
+// modifikátor pro zdvojení obrany nestvůry
+class ZdvojenaObranaModifikator extends ModifikatorNestvury {
+    constructor(nestvura) {
+        super(nestvura);
+    }
+
+    proved() {
+        console.log(`Zdvojuji obranu nestvůry ${this.nestvura.jmeno}.`);
+        this.nestvura.obrana *= 2;
+        // zavolání metody proved nadtřídy pro provedení
+        // metody proved dalšího objektu v řetězci
+        super.proved();
+    }
+}
+
+// modifikátor, který přeruší provádění modifikátorů v řetězci modifikátorů
+class ZadnyBonusModifikator extends ModifikatorNestvury {
+    constructor(nestvura) {
+        super(nestvura);
+    }
+
+    proved() {
+        console.log("Žádné další modifikátory v řetězci se neaplikují.");
+        // když nezavoláme metodu proved nadtřídy, tak se metody
+        // proved zbývajících objektů v řetězci nezavolají
+    }
+}
+
+
+const goblin = new Nestvura("Goblin", 4, 6);
+console.log(goblin.toString());
+
+// vytvoření počátečního modifikátoru (začátek řetězce modifikátorů)
+let root = new ModifikatorNestvury(goblin);
+
+// přidání modifikátorů do řetězce
+root.pridej(new ZdvojenyUtokModifikator(goblin));
+root.pridej(new ZdvojenaObranaModifikator(goblin));
+root.pridej(new ZadnyBonusModifikator(goblin));
+// tento modifikátor se již neaplikuje, protože předchozí
+// modifikátor nezavolá metodu proved nadtřídy
+root.pridej(new ZdvojenyUtokModifikator(goblin));
+
+// aplikování řetězce modifikátorů
+root.proved();
+
+console.log(goblin.toString());</code></pre>
+                    <p class="paragraph u-mb-medium">Modifikátory jsou v předchozí ukázce v podstatě uspořádány do linked listu, o kterém si můžete přečíst na mých stránkách o <a href="https://jirkasa.github.io/algoritmy-a-datove-struktury-v-js/singly-linked-list/" target="_blank" class="anchor">algoritmech a datových strukturách v JavaScriptu</a>.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Příklad - Event Broker</h2>
+                    <p class="paragraph u-mb-small">Chain of responsibility nemusí být implementován jen pomocí linked listu nebo nějaké podobné datové struktury, jak to ukazoval předchozí příklad. Může být také například implementován pomocí nějaké centralizované komponenty.</p>
+                    <p class="paragraph u-mb-small">Následující ukázka předchozí příklad předělává a pro implementaci řetězení modifikátorů používá Event Broker. Jedná se o komponentu, která má za úkol zprostředkovávat přenosy událostí mezi jejich producenty a odběrateli. V našem příkladu můžeme Event Broker použít pro přihlášení k odběru dotazů a k pokládání dotazů. Modifikátory nestvůry se přihlašují k odběru dotazů a nestvůra dotazy pokládá. Když se například chceme dozvědět hodnotu útoku nestvůry, tak použijeme Event Broker pro položení dotazu k získání hodnoty útoku a modifikátory postupně tuto hodnotu určí.</p>
+                    <pre class="code-box u-mb-medium"><code>// Tato třída je vysvětlena v části o návrhovém vzoru Observer
+// - ale myslím že byste mohli pochopit už tady jak to funguje
+class Event {
+    constructor() {
+        // v této mapě se ukládají funkce, které
+        // se mají po spuštění eventu zavolat
+        this.handlers = new Map();
+        this.count = 0;
+    }
+
+    // tato metoda slouží pro přidání funkce,
+    // která se zavolá po spuštění eventu
+    subscribe(handler) {
+        // přidání funkce do mapy
+        this.handlers.set(this.count, handler);
+        // vrací se token (klíč pod kterým se funkce nachází v mapě handlers)
+        // - tento token se později může použít k odstranění funkce
+        return this.count++;
+    }
+
+    // metoda k odstranění funkce z mapy handlers podle předaného tokenu
+    unsubscribe(idx) {
+        this.handlers.delete(idx);
+    }
+
+    // zavolání této metody spustí event
+    fire(sender, args) {
+        // všechny funkce v mapě handlers se zavolají
+        this.handlers.forEach(v => v(sender, args));
+    }
+}
+
+
+const TypDotazu = Object.freeze({
+    utok: 0,
+    obrana: 1
+});
+
+// pomocí objektu Dotaz si můžeme vytvořit dotaz, který předáme,
+// při volání metody provedDotaz objektu typu Hra
+class Dotaz {
+    constructor(jmenoNestvury, typDotazu, hodnota) {
+        this.jmenoNestvury = jmenoNestvury;
+        this.typDotazu = typDotazu;
+        this.hodnota = hodnota;
+    }
+}
+
+// Event Broker
+// - má na starosti přenosy událostí mezi jejími producenty a odběrateli
+// - v našem případě obsahuje objekt typu event a ten používá pro pokládání dotazů
+class Hra {
+    constructor() {
+        // prostřednictvím tohoto objektu se budou pokládat dotazy
+        // - k tomuto objektu se mohou přihlásit objekty k odběru událostí (k odběru dotazů)
+        this.dotazy = new Event();
+    }
+
+    // provede dotaz prostřednictvím objektu dotazy
+    provedDotaz(odesilatel, dotaz) {
+        this.dotazy.fire(odesilatel, dotaz);
+    }
+}
+
+
+class Nestvura {
+    constructor(hra, jmeno, utok, obrana) {
+        // uložení Event Brokeru
+        this.hra = hra;
+        // uložení jména nestvůry
+        this.jmeno = jmeno;
+        // uložení počátečního útoku a obrany
+        this.pocatecniUtok = utok;
+        this.pocatecniObrana = obrana;
+    }
+
+    get utok() {
+        // vytvoření dotazu týkající se útoku nestvůry
+        let dotaz = new Dotaz(this.jmeno, TypDotazu.utok, this.pocatecniUtok);
+        // provede se dotaz přes Event Broker
+        this.hra.provedDotaz(this, dotaz);
+        // hodnota dotazu obsahuje útok nestvůry
+        return dotaz.hodnota;
+    }
+
+    get obrana() {
+        // vytvoření dotazu týkající se obrany nestvůry
+        let dotaz = new Dotaz(this.jmeno, TypDotazu.obrana, this.pocatecniObrana);
+        // provede se dotaz přes Event Broker
+        this.hra.provedDotaz(this, dotaz);
+        // hodnota dotazu obsahuje obranu nestvůry
+        return dotaz.hodnota;
+    }
+
+    toString() {
+        return `${this.jmeno} [útok: ${this.utok}, obrana: ${this.obrana}]`;
+    }
+}
+
+
+class ModifikatorNestvury {
+    constructor(hra, nestvura) {
+        // uložení Event Brokeru
+        this.hra = hra;
+        // uložení nestvůry, které modifikátor patří
+        this.nestvura = nestvura;
+        // přihlášení k odběru dotazů (při položení dotazu se zavolá metoda proved)
+        // - metoda bind nastaví, že až se bude funkce volat, tak má klíčové slovo this odkazovat na tento objekt
+        this.token = hra.dotazy.subscribe(this.proved.bind(this));
+    }
+
+    proved(odesilatel, dotaz) { /* implementace v podtřídách */ }
+
+    // metoda pro zrušení modifikátoru
+    zrus() {
+        // při zrušení modifikátoru dojde k odhlášení odběru dotazů
+        this.hra.dotazy.unsubscribe(this.token);
+    }
+}
+
+class ZdvojenyUtokModifikator extends ModifikatorNestvury {
+    constructor(hra, nestvura) {
+        super(hra, nestvura);
+    }
+
+    proved(odesilatel, dotaz) {
+        // pokud se dotaz týká útoku a nestvůry, které modifikátor
+        // patří, tak se hodnota dotazu zdvojnásobí (zdvojnásobí se útok)
+        if (dotaz.jmenoNestvury === this.nestvura.jmeno &&
+            dotaz.typDotazu === TypDotazu.utok) {
+                dotaz.hodnota *= 2;
+        }
+    }
+}
+
+class ZdvojenaObranaModifikator extends ModifikatorNestvury {
+    constructor(hra, nestvura) {
+        super(hra, nestvura);
+    }
+
+    proved(odesilatel, dotaz) {
+        // pokud se dotaz týká obrany a nestvůry, které modifikátor
+        // patří, tak se hodnota dotazu zdvojnásobí (zdvojnásobí se obrana)
+        if (dotaz.jmenoNestvury === this.nestvura.jmeno &&
+            dotaz.typDotazu === TypDotazu.obrana) {
+                dotaz.hodnota *= 2;
+        }
+    }
+}
+
+
+const hra = new Hra();
+
+const goblin = new Nestvura(hra, "Goblin", 4, 6);
+console.log("Na začátku: " + goblin.toString());
+
+const zum = new ZdvojenyUtokModifikator(hra, goblin);
+console.log("Po přidání zdvojeného útoku: " + goblin.toString());
+
+const zom = new ZdvojenaObranaModifikator(hra, goblin);
+console.log("Po přidání zdvojené obrany: " + goblin.toString());
+
+zom.zrus();
+console.log("Po odstranění zdvojené obrany: " + goblin.toString());
+
+zum.zrus();
+console.log("Po odstranění zdvojeného útoku: " + goblin.toString());</code></pre>
+                    <div class="u-text-center">
+                        <a href="#" class="button-primary">pokračovat na další část</a>
+                    </div>
+                </div>
+                <div class="article-page__lateral-side">
+                    <div class="article-page__sticky-content">
+                        <h2 class="heading-secondary u-mb-small">Části Tutoriálu</h2>
+                        <nav class="navigation">
+                            <ul>
+                                <li class="navigation__group">
+                                    <ul>
+                                        <li><a class="navigation__link" href="../navrhove-principy/">Návrhové principy</a></li>
+                                    </ul>
+                                </li>
+                                <li class="navigation__group">Creational
+                                    <ul>
+                                        <li><a class="navigation__link" href="../builder/">Builder</a></li>
+                                        <li><a class="navigation__link" href="../factory/">Factory</a></li>
+                                        <li><a class="navigation__link" href="../prototype/">Prototype</a></li>
+                                        <li><a class="navigation__link" href="../singleton/">Singleton</a></li>
+                                    </ul>
+                                </li>
+                                <li class="navigation__group">Structural
+                                    <ul>
+                                        <li><a class="navigation__link" href="../adapter/">Adapter</a></li>
+                                        <li><a class="navigation__link" href="../bridge/">Bridge</a></li>
+                                        <li><a class="navigation__link" href="../composite/">Composite</a></li>
+                                        <li><a class="navigation__link" href="../decorator/">Decorator</a></li>
+                                        <li><a class="navigation__link" href="../facade/">Facade</a></li>
+                                        <li><a class="navigation__link" href="../flyweight/">Flyweight</a></li>
+                                        <li><a class="navigation__link" href="../proxy/">Proxy</a></li>
+                                    </ul>
+                                </li>
+                                <li class="navigation__group">Behavioral
+                                    <ul>
+                                        <li><a class="navigation__link navigation__link--active" href="../chain-of-responsibility/">Chain of responsibility</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
