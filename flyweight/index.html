@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=yes maximum-scale=2.2 minimum-scale=1.0">
+    <title>Návrhové vzory v JS - Flyweight</title>
+
+    <script src="../media/js/libraries/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+
+    <link rel="stylesheet" href="../media/css/style.css">
+</head>
+<body>
+    <div class="page">
+        <header class="header">
+            <div class="header__content">
+                <h2 class="header__title"><span>Návrhové vzory</span> v JS</h2>
+                <nav class="header__nav">
+                    <ul>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+        <div class="article-page">
+            <div class="article-page__content">
+                <div class="article-page__main-side">
+                    <h1 class="heading-primary u-mb-small">Flyweight</h1>
+                    <hr class="horizontal-rule u-mb-small">
+                    <p class="paragraph u-mb-medium">Tato část je o Flyweight (česky muší váha). Jedná se o návrhový vzor, který se snaží ušetřit paměť.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Proč Flyweight použít</h2>
+                    <p class="paragraph u-mb-medium">Návrhový vzor Flyweight můžeme použít, když například ukládáme stejnou informaci pro větší množství objektů. Namísto toho abychom například ukládali stejnou hodnotu v každém objektu jen můžeme specifikovat, jaké skupiny objektů se hodnota týká a uložit ji mimo objekty. Pokud například děláme nějaký textový editor, ve kterém se formátuje text, tak namísto toho abychom pro každý znak ukládali jestli má být napsaný třeba tučně, můžeme jen určit počáteční znak, od kterého má být text tučný a konečný znak, kde již tučný text být nemá. Flyweight se tedy snaží vyhnout redundanci při ukládání dat.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Příklad - Formátování textu</h2>
+                    <p class="paragraph u-mb-small">Flyweight se dobře ukazuje na formátování textu. Následující ukázka ukazuje formátování textu bez použití Flyweight. Pro každý znak textu se formátování ukládá zvlášť. Formátuje se jen velikost písmen, protože text vypisujeme pouze do konzole.</p>
+                    <pre class="code-box u-mb-small"><code>class FormatovanyText {
+    constructor(text) {
+        this.text = text;
+        // v tomto poli se pro každý znak textu ukládá,
+        // jestli má být napsán velkým písmenem
+        this.velkaPismena = new Array(text.length).map(() => false);
+    }
+
+    // funkce pro naformátování části textu na velká písmena
+    nastavVelkaPismena(start, konec) {
+        for (let i = start; i &lt; konec; i++)
+            this.velkaPismena[i] = true;
+    }
+
+    toString() {
+        // do tohoto pole se postupně vloží znaky textu
+        const buffer = [];
+        // tento cyklus projde každý znak v textu
+        for (let i in this.text) {
+            let znak = this.text[i];
+            // pokud má být znak napsán velkým písmenem, tak se tak
+            // do pole přidá; jinak se přidá bez modifikace
+            buffer.push(this.velkaPismena[i] ? znak.toUpperCase() : znak);
+        }
+        // znaky v poli se spojí do řetězce a ten metoda vrátí
+        return buffer.join("");
+    }
+}
+
+
+// vytvoření formátovaného textu
+const text = new FormatovanyText("Návrhové vzory v JavaScriptu");
+text.nastavVelkaPismena(9, 14);
+// vypsání naformátovaného textu
+console.log(text.toString());</code></pre>
+                    <p class="paragraph u-mb-small">Formátování textu není potřeba ukládat pro každý znak zvlášť, jak to ukazuje předchozí ukázka. Můžeme si určit rozsah znaků, které se mají formátovat a informace o formátování tedy můžeme uložit jen jednou. Následující ukázka ukazuje, jak to můžeme udělat. Pokud chceme text formátovat, tak nejdříve musíme získat rozsah na který se formátovaní aplikuje a informace o formátování nastavujeme na tomto rozsahu.</p>
+                    <pre class="code-box u-mb-medium"><code>// třída sloužící k formátování části textu
+// - formátování se již neukládá na každý znak, ale na rozsah znaků
+class TextovyRozsah {
+    constructor(start, konec) {
+        this.start = start;
+        this.konec = konec;
+        // určuje, jestli má být část textu napsána velkými písmeny
+        this.velkaPismena = false;
+    }
+
+    // tato metoda slouží ke zjištění, jestli rozsah obsahuje předaný znak
+    obsahuje(pozice) {
+        return pozice &gt;= this.start && pozice &lt;= this.konec;
+    }
+}
+
+class FormatovanyText {
+    constructor(text) {
+        this.text = text;
+        // v tomto poli se budou ukládat textové rozsahy,
+        // které budou obsahovat formátování textu
+        this.formatovani = [];
+    }
+
+    // pro formátování části textu můžeme pomocí této metody
+    // získat rozsah, který můžeme naformátovat
+    ziskejRozsah(start, konec) {
+        const rozsah = new TextovyRozsah(start, konec);
+        this.formatovani.push(rozsah);
+        return rozsah;
+    }
+
+    toString() {
+        // do tohoto pole se postupně vloží znaky textu
+        const buffer = [];
+        // tento cyklus projde každý znak v textu
+        for (let i in this.text) {
+            let znak = this.text[i];
+            // projde se každý rozsah v poli formatovani
+            for (let rozsah of this.formatovani) {
+                // pokud rozsah nastavuje, že se má nastavit velké písmeno a znak
+                // se v rozsahu nachází, tak se znak nastaví na velké písmeno
+                if (rozsah.obsahuje(i) && rozsah.velkaPismena)
+                    znak = znak.toUpperCase();
+            }
+            // znak se přidá do pole
+            buffer.push(znak);
+        }
+        // znaky v poli se spojí do řetězce a ten metoda vrátí
+        return buffer.join("");
+    }
+}
+
+// vytvoření formátovaného textu
+const text = new FormatovanyText("Návrhové vzory v JavaScriptu");
+text.ziskejRozsah(9, 14).velkaPismena = true;
+// vypsání naformátovaného textu
+console.log(text.toString());</code></pre>
+                    <h2 class="heading-secondary u-mb-tiny">Příklad - Nastavování stejných vlastností více objektům</h2>
+                    <p class="paragraph u-mb-small">Následující ukázka ukazuje třídu Nepritel, která představuje nepřítele třeba v nějaké hře. Třída Nepritel ukládá jméno nepřítele a nějaké další vlastnosti. V kódu vytváříme 1000 instancí této třídy a pro každou nastavujeme jedno z 5 jmen.</p>
+                    <pre class="code-box u-mb-small"><code>// tato třída představuje nepřítele třeba v nějaké hře
+class Nepritel {
+    constructor(jmeno) {
+        // uložení jména nepřítele
+        this.jmeno = jmeno;
+        // nějaké další vlastnosti
+        this.zivoty = 10;
+        this.sila = 5;
+    }
+}
+
+
+// funkce, která vrátí náhodné jméno z 5 možných jmen
+function nahodneJmeno() {
+    const cislo = Math.trunc(Math.random() * 5);
+
+    switch (cislo) {
+        case 0:
+            return "Ivan";
+        case 1:
+            return "Karel";
+        case 2:
+            return "Marek";
+        case 3:
+            return "Pavel";
+        case 4:
+            return "Igor";
+    }
+}
+
+const nepratele = [];
+// vygenerování 1000 nepřátel
+for (let i = 0; i &lt; 1000; i++) {
+    // nepříteli se při jeho vytváření nastaví jedno
+    // z 5 jmen, které vrátí funkce nahodneJmeno
+    const nepritel = new Nepritel(nahodneJmeno());
+    nepratele.push(nepritel);
+}
+
+// součet všech znaků ve jménech vygenerovaných nepřátel
+let pocetZnaku = 0;
+for (let nepritel of nepratele)
+    pocetZnaku += nepritel.jmeno.length;
+console.log(pocetZnaku);</code></pre>
+                    <p class="paragraph u-mb-small">V předchozí ukázce ukládáme jméno každého nepřítele jako jeho vlastní vlastnost. Vzhledem k tomu, že generujeme 1000 nepřátel a každý nepřítel může mít jedno z 5 jmen, je vhodné jména nepřátel ukládat například v nějakém poli a vždy jen nepříteli nastavit index na jméno v tomto poli, podle toho jaké jméno má mít. Tím ušetříme paměť, ale na druhou stranu o něco zvýšíme časovou náročnost při vytváření nového nepřítele, protože musíme zjišťovat index jména v poli. To je ale u našeho příkladu zanedbatelné, protože máme jen 5 možných jmen.</p>
+                    <pre class="code-box u-mb-medium"><code>class Nepritel {
+    // jmena se budou ukládat v tomto poli, které patří třídě
+    static jmena = [];
+
+    constructor(jmeno) {
+        // uložení indexu na jméno v poli jmena
+        this.jmenoID = this._ziskejNeboPridejJmeno(jmeno);
+        // nějaké další vlastnosti
+        this.zivoty = 10;
+        this.sila = 5;
+    }
+
+    _ziskejNeboPridejJmeno(jmeno) {
+        // pokud pole jmena obsahuje předané jméno, tak
+        // se vrátí index pod kterým je v poli uloženo
+        let idx = Nepritel.jmena.indexOf(jmeno);
+        if (idx !== -1) return idx;
+
+        // pokud pole jmena neobsahuje předané jméno, tak
+        // se do něj jméno přidá a vrátí se jeho index
+        Nepritel.jmena.push(jmeno);
+        return Nepritel.jmena.length-1;
+    }
+}
+
+
+function nahodneJmeno() {
+    const cislo = Math.trunc(Math.random() * 5);
+
+    switch (cislo) {
+        case 0:
+            return "Ivan";
+        case 1:
+            return "Karel";
+        case 2:
+            return "Marek";
+        case 3:
+            return "Pavel";
+        case 4:
+            return "Igor";
+    }
+}
+
+const nepratele = [];
+// vygenerování 1000 nepřátel
+for (let i = 0; i &lt; 1000; i++) {
+    const nepritel = new Nepritel(nahodneJmeno());
+    nepratele.push(nepritel);
+}
+
+// součet všech znaků ve jménech vygenerovaných nepřátel
+// - bude jich málo oproti předchozí ukázce
+let pocetZnaku = 0;
+for (let jmeno of Nepritel.jmena)
+    pocetZnaku += jmeno.length;
+console.log(pocetZnaku);</code></pre>
+                    <div class="u-text-center">
+                        <a href="#" class="button-primary">pokračovat na další část</a>
+                    </div>
+                </div>
+                <div class="article-page__lateral-side">
+                    <div class="article-page__sticky-content">
+                        <h2 class="heading-secondary u-mb-small">Části Tutoriálu</h2>
+                        <nav class="navigation">
+                            <ul>
+                                <li class="navigation__group">
+                                    <ul>
+                                        <li><a class="navigation__link" href="../navrhove-principy/">Návrhové principy</a></li>
+                                    </ul>
+                                </li>
+                                <li class="navigation__group">Creational
+                                    <ul>
+                                        <li><a class="navigation__link" href="../builder/">Builder</a></li>
+                                        <li><a class="navigation__link" href="../factory/">Factory</a></li>
+                                        <li><a class="navigation__link" href="../prototype/">Prototype</a></li>
+                                        <li><a class="navigation__link" href="../singleton/">Singleton</a></li>
+                                    </ul>
+                                </li>
+                                <li class="navigation__group">Structural
+                                    <ul>
+                                        <li><a class="navigation__link" href="../adapter/">Adapter</a></li>
+                                        <li><a class="navigation__link" href="../bridge/">Bridge</a></li>
+                                        <li><a class="navigation__link" href="../composite/">Composite</a></li>
+                                        <li><a class="navigation__link" href="../decorator/">Decorator</a></li>
+                                        <li><a class="navigation__link" href="../facade/">Facade</a></li>
+                                        <li><a class="navigation__link navigation__link--active" href="../flyweight/">Flyweight</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
