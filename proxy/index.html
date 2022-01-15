@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=yes maximum-scale=2.2 minimum-scale=1.0">
+    <title>Návrhové vzory v JS - Proxy</title>
+
+    <script src="../media/js/libraries/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+
+    <link rel="stylesheet" href="../media/css/style.css">
+</head>
+<body>
+    <div class="page">
+        <header class="header">
+            <div class="header__content">
+                <h2 class="header__title"><span>Návrhové vzory</span> v JS</h2>
+                <nav class="header__nav">
+                    <ul>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+        <div class="article-page">
+            <div class="article-page__content">
+                <div class="article-page__main-side">
+                    <h1 class="heading-primary u-mb-small">Proxy</h1>
+                    <hr class="horizontal-rule u-mb-small">
+                    <p class="paragraph u-mb-medium">V této části se podíváme na návrhový vzor Proxy. V nejobecnější podobě se jedná o třídu, která slouží jako rozhraní pro něco jiného.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Proč Proxy použít</h2>
+                    <p class="paragraph u-mb-small">Občas můžeme chtít u nějaké třídy přidat/pozměnit funkcionalitu. Pomocí proxy například můžeme různě kontrolovat přístup k objektu nebo třeba můžeme přidávat nějakou další funkcionalitu, když se zavolá metoda třídy.</p>
+                    <p class="paragraph u-mb-medium">K vytvoření proxy jednoduše replikujeme rozhraní existující třídy a u některých metod předěláváme/přidáváme funkcionalitu.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Příklad - Proxy pro hodnotu</h2>
+                    <p class="paragraph u-mb-small">Proxy si nemusíme vytvářet jen pro nějakou třídu, ale můžeme si ji vytvořit třeba i pro nějakou hodnotu. Následující ukázka ukazuje proxy pro hodnotu, která představuje procento. Když s procentem pracujeme, tak se mění jeho hodnota.</p>
+                    <pre class="code-box u-mb-medium"><code>// třída pro procentuální hodnoty
+class Procento {
+    constructor(procento) {
+        this.procento = procento;
+    }
+
+    // pomocí této metody určujeme, co se použije při
+    // použití objektu třídy Procento s řetězci
+    toString() {
+        return `${this.procento}%`;
+    }
+
+    // PROXY pro hodnotu procenta - měníme jeho hodnotu, když jej použijeme
+    // - pomocí této metody určujeme hodnotu, která se použije, když
+    // - objekt třídy Procento použijeme třeba pro nějaký výpočet
+    valueOf() {
+        return this.procento/100;
+    }
+}
+
+const petProcent = new Procento(5);
+// pokud budeme s procentem pracovat, tak se nejdříve automaticky vydělí 100
+console.log(`${petProcent} z 50 je ${50*petProcent}`);
+// vypíše se: 5% z 50 je 2.5</code></pre>
+                    <h2 class="heading-secondary u-mb-tiny">Příklad - Proxy pro vlastnost objektu</h2>
+                    <p class="paragraph u-mb-small">Proxy si můžeme vytvořit také například pro vlastnosti objektu. V následující ukázce se vytváří objekt, který obsahuje vlastnost, kterou když změníme, tak se nám o tom vypíše informace do konzole.</p>
+                    <pre class="code-box u-mb-medium"><code>// Proxy, kterou můžeme použít jako vlastnost objektu
+class Vlastnost {
+    constructor(hodnota, jmeno) {
+        this._hodnota = hodnota;
+        this.jmeno = jmeno;
+    }
+
+    get hodnota() { return this._hodnota; }
+    set hodnota(novaHodnota) {
+        if (this._hodnota === novaHodnota) return;
+        this._hodnota = novaHodnota;
+        // kromě toho, že se změní hodnota vlastnosti, tak se
+        // nám o tom ještě navíc vypíše informace do konzole
+        console.log(`Proběhla změna vlastnosti ${this.jmeno} na ${novaHodnota}.`);
+    }
+}
+
+class Nestvura {
+    constructor() {
+        this._zivoty = new Vlastnost(10, "zivoty");
+    }
+
+    get zivoty() { return this._zivoty.hodnota; }
+    set zivoty(hodnota) {
+        this._zivoty.hodnota = hodnota;
+    }
+}
+
+
+const nestvura = new Nestvura();
+// když budeme měnit vlastnost zivoty objektu nestvura,
+// tak se nám o tom bude vypisovat informace do konzole
+nestvura.zivoty = 9;
+nestvura.zivoty = 7;</code></pre>
+                    <h2 class="heading-secondary u-mb-tiny">Příklad - Ochranná Proxy</h2>
+                    <p class="paragraph u-mb-small">Proxy můžeme chtít použít, když chceme omezit přístup k některým metodám třídy podle nějaké podmínky. Následující ukázka ukazuje třídu Auto, která obsahuje metodu ridit. Také ukazuje třídu ChraneneAuto, která je proxy pro třídu Auto a zajišťuje, že se metoda ridit třídy Auto nezavolá, pokud má řidič méně jak 18 let.</p>
+                    <pre class="code-box u-mb-medium"><code>class Auto {
+    ridit() {
+        console.log("Auto je řízeno.");
+    }
+}
+
+// Proxy pro třídu Auto
+class ChraneneAuto {
+    constructor(ridic) {
+        this.ridic = ridic;
+        this._auto = new Auto();
+    }
+
+    // v metode ridit se kontroluje jestli má
+    // řidič věk na to aby mohl řídit auto
+    ridit() {
+        if (this.ridic.vek >= 18) {
+            this._auto.ridit();
+        } else {
+            console.log("Řidič nemůže řídit auto.");
+        }
+    }
+}
+
+class Ridic {
+    constructor(vek) {
+        this.vek = vek;
+    }
+}
+
+
+const ridic = new Ridic(17);
+// vytvoření instance třídy ChraneneAuto
+// - můžeme ji používat stejným způsobem jako třídu Auto, má stejné metody
+const auto = new ChraneneAuto(ridic);
+
+// řidič má 17 let, ještě řídit nemůže
+auto.ridit();
+ridic.vek++;
+// řidič má 18 let, již auto řídit může
+auto.ridit();</code></pre>
+                    <h2 class="heading-secondary u-mb-tiny">Příklad - Virtuální Proxy</h2>
+                    <p class="paragraph u-mb-small">Virtuální proxy je proxy, která zajišťuje, že se objekty, které jsou náročné na vytvoření plně vytvoří až při první interakci s objektem. Následující ukázka ukazuje třídu Obrazek a třídu LazyObrazek. Třída Obrazek reprezentuje obrázek, který se načte při vytvoření instance třídy a můžeme jej vykreslit metodou vykresli. Třída LazyObrazek je Proxy pro třídu Obrazek a zajišťuje, že se obrázek načte až při prvním zavolání metody vykresli.</p>
+                    <pre class="code-box u-mb-medium"><code>// třída představující obrázek
+// - obrázek se načte při vytvoření objektu
+// - načte se i když nikdy nezavoláme metodu vykresli
+class Obrazek {
+    constructor(url) {
+        this.url = url;
+        // simulace načtení obrázku
+        console.log(`Obrázek se načítá z ${url}`);
+    }
+
+    // metoda pro simulaci vykreslení obrázku
+    vykresli() {
+        console.log(`Vykresluji obrázek (${this.url}).`);
+    }
+}
+
+// Proxy pro třídu Obrazek
+// - implementace lazy loadingu
+// - obrázek se načte až při volání metody vykresli
+class LazyObrazek {
+    constructor(url) {
+        this.url = url;
+
+    }
+
+    vykresli() {
+        // obrázek se načte (vytvoří) až se poprvé zavolá metoda vykresli
+        if (!this.obrazek) this.obrazek = new Obrazek(this.url);
+        this.obrazek.vykresli();
+    }
+}
+
+
+// funkce pro vykreslení obrázku (abychom viděli, kdy se obrázek načítá)
+function vykresliObrazek(obrazek) {
+    console.log("Bude se vykreslovat obrázek.");
+    obrazek.vykresli();
+    console.log("Obrázek se vykreslil.");
+}
+
+const obrazek1 = new Obrazek("http://localhost/obrazky/obrazek1.jpg");
+const obrazek2 = new LazyObrazek("http://localhost/obrazky/obrazek2.jpg");
+vykresliObrazek(obrazek1);
+console.log("-------------------");
+vykresliObrazek(obrazek2);</code></pre>
+                    <div class="u-text-center">
+                        <a href="#" class="button-primary">pokračovat na další část</a>
+                    </div>
+                </div>
+                <div class="article-page__lateral-side">
+                    <div class="article-page__sticky-content">
+                        <h2 class="heading-secondary u-mb-small">Části Tutoriálu</h2>
+                        <nav class="navigation">
+                            <ul>
+                                <li class="navigation__group">
+                                    <ul>
+                                        <li><a class="navigation__link" href="../navrhove-principy/">Návrhové principy</a></li>
+                                    </ul>
+                                </li>
+                                <li class="navigation__group">Creational
+                                    <ul>
+                                        <li><a class="navigation__link" href="../builder/">Builder</a></li>
+                                        <li><a class="navigation__link" href="../factory/">Factory</a></li>
+                                        <li><a class="navigation__link" href="../prototype/">Prototype</a></li>
+                                        <li><a class="navigation__link" href="../singleton/">Singleton</a></li>
+                                    </ul>
+                                </li>
+                                <li class="navigation__group">Structural
+                                    <ul>
+                                        <li><a class="navigation__link" href="../adapter/">Adapter</a></li>
+                                        <li><a class="navigation__link" href="../bridge/">Bridge</a></li>
+                                        <li><a class="navigation__link" href="../composite/">Composite</a></li>
+                                        <li><a class="navigation__link" href="../decorator/">Decorator</a></li>
+                                        <li><a class="navigation__link" href="../facade/">Facade</a></li>
+                                        <li><a class="navigation__link" href="../flyweight/">Flyweight</a></li>
+                                        <li><a class="navigation__link navigation__link--active" href="../proxy/">Proxy</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
