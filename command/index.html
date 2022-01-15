@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=yes maximum-scale=2.2 minimum-scale=1.0">
+    <title>Návrhové vzory v JS - Command</title>
+
+    <script src="../media/js/libraries/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+
+    <link rel="stylesheet" href="../media/css/style.css">
+</head>
+<body>
+    <div class="page">
+        <header class="header">
+            <div class="header__content">
+                <h2 class="header__title"><span>Návrhové vzory</span> v JS</h2>
+                <nav class="header__nav">
+                    <ul>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+        <div class="article-page">
+            <div class="article-page__content">
+                <div class="article-page__main-side">
+                    <h1 class="heading-primary u-mb-small">Command</h1>
+                    <hr class="horizontal-rule u-mb-small">
+                    <p class="paragraph u-mb-medium">V této části si ukážeme návrhový vzor Command. Jedná se v podstatě o objekt, který obsahuje instrukci k vykonání nějaké akce.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Proč Command použít</h2>
+                    <p class="paragraph u-mb-small">V kódu často provádíme operace, které nemůžeme vrátit zpět. Když například nějaké proměnné nastavíme novou hodnotu, tak nemůžeme tuto operaci vrátit. Pokud chceme umožnit vrátit zpět nějaké změny, tak můžeme použít návrhový vzor Command. Můžeme si informace o provedených operacích někde ukládat a když je budeme chtít vrátit zpět, tak to díky těmto informacím můžeme udělat.</p>
+                    <p class="paragraph u-mb-medium">Command se dá použít k vytvoření undo/redo funkce. Můžeme tedy uživatelům umožnit vrátit jimi provedené změny zpět.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Příklad - Umožnění vrátit operaci zpět</h2>
+                    <p class="paragraph u-mb-small">Následující příklad ukazuje třídu BankovniUcet, která představuje bankovní účet a třídu BankovniUcetCommand. Namísto toho, abychom s objektem třídy BankovniUcet manipulovali pomocí jeho metod, vytváříme si objekty třídy BankovniUcetCommand, které obsahují informace o provedených změnách. Díky tomu můžeme provedené operace vrátit zpět.</p>
+                    <pre class="code-box u-mb-small"><code>// třída reprezentující bankovní účet
+class BankovniUcet {
+    constructor(zustatek = 0) {
+        this.zustatek = zustatek;
+    }
+
+    vlozit(castka) {
+        this.zustatek += castka;
+        console.log(`Bylo vloženo ${castka}, zůstatek je nyní ${this.zustatek}.`);
+    }
+
+    vybrat(castka) {
+        this.zustatek -= castka;
+        console.log(`Bylo vybráno ${castka}, zůstatek je nyní ${this.zustatek}.`);
+    }
+
+    toString() {
+        return `Zůstatek: ${this.zustatek}`;
+    }
+}
+
+const Akce = Object.freeze({
+    vlozit: 0,
+    vybrat: 1
+});
+
+// Command pro operace s třídou BankovniUcet
+class BankovniUcetCommand {
+    constructor(ucet, akce, castka) {
+        this.ucet = ucet;
+        this.akce = akce;
+        this.castka = castka;
+    }
+
+    // metoda pro provedení příkazu
+    proved() {
+        switch (this.akce) {
+            case Akce.vlozit:
+                this.ucet.vlozit(this.castka);
+                break;
+            case Akce.vybrat:
+                this.ucet.vybrat(this.castka);
+                break;
+        }
+    }
+
+    // metoda pro vrácení příkazu zpět
+    vratZpet() {
+        // provedením opačné operace provedené operace se bankovní účet
+        // vrátí do stavu, ve kterém byl před provedením operace
+        switch (this.akce) {
+            case Akce.vlozit:
+                this.ucet.vybrat(this.castka);
+                break;
+            case Akce.vybrat:
+                this.ucet.vlozit(this.castka);
+                break;
+        }
+    }
+}
+
+
+const ucet = new BankovniUcet(50);
+console.log(ucet.toString());
+
+// vytvoření příkazu
+const cmd = new BankovniUcetCommand(ucet, Akce.vybrat, 15);
+// provedení příkazu
+cmd.proved();
+
+// vrácení příkazu zpět
+cmd.vratZpet();
+console.log(ucet.toString());</code></pre>
+                    <p class="paragraph u-mb-medium">Třídu BankovniUcetCommand bychom mohli ještě vylepšit. Mohli bychom například přidat vlastnost, která by určovala, jestli se příkaz povedlo provést a tak dále.</p>
+                    <div class="u-text-center">
+                        <a href="#" class="button-primary">pokračovat na další část</a>
+                    </div>
+                </div>
+                <div class="article-page__lateral-side">
+                    <div class="article-page__sticky-content">
+                        <h2 class="heading-secondary u-mb-small">Části Tutoriálu</h2>
+                        <nav class="navigation">
+                            <ul>
+                                <li class="navigation__group">
+                                    <ul>
+                                        <li><a class="navigation__link" href="../navrhove-principy/">Návrhové principy</a></li>
+                                    </ul>
+                                </li>
+                                <li class="navigation__group">Creational
+                                    <ul>
+                                        <li><a class="navigation__link" href="../builder/">Builder</a></li>
+                                        <li><a class="navigation__link" href="../factory/">Factory</a></li>
+                                        <li><a class="navigation__link" href="../prototype/">Prototype</a></li>
+                                        <li><a class="navigation__link" href="../singleton/">Singleton</a></li>
+                                    </ul>
+                                </li>
+                                <li class="navigation__group">Structural
+                                    <ul>
+                                        <li><a class="navigation__link" href="../adapter/">Adapter</a></li>
+                                        <li><a class="navigation__link" href="../bridge/">Bridge</a></li>
+                                        <li><a class="navigation__link" href="../composite/">Composite</a></li>
+                                        <li><a class="navigation__link" href="../decorator/">Decorator</a></li>
+                                        <li><a class="navigation__link" href="../facade/">Facade</a></li>
+                                        <li><a class="navigation__link" href="../flyweight/">Flyweight</a></li>
+                                        <li><a class="navigation__link" href="../proxy/">Proxy</a></li>
+                                    </ul>
+                                </li>
+                                <li class="navigation__group">Behavioral
+                                    <ul>
+                                        <li><a class="navigation__link" href="../chain-of-responsibility/">Chain of responsibility</a></li>
+                                        <li><a class="navigation__link navigation__link--active" href="../command/">Command</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
