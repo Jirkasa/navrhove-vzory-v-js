@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=yes maximum-scale=2.2 minimum-scale=1.0">
+    <title>Návrhové vzory v JS - Interpreter</title>
+
+    <script src="../media/js/libraries/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+
+    <link rel="stylesheet" href="../media/css/style.css">
+</head>
+<body>
+    <div class="page">
+        <header class="header">
+            <div class="header__content">
+                <h2 class="header__title"><span>Návrhové vzory</span> v JS</h2>
+                <nav class="header__nav">
+                    <ul>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+        <div class="article-page">
+            <div class="article-page__content">
+                <div class="article-page__main-side">
+                    <h1 class="heading-primary u-mb-small">Interpreter</h1>
+                    <hr class="horizontal-rule u-mb-small">
+                    <p class="paragraph u-mb-medium">V této části se podíváme na návrhový vzor Interpreter. Tento návrhový vzor určuje, jakým způsobem implementovat interpretaci nějakého jazyka například pomocí objektově orientovaného programování.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Proč Interpreter použít</h2>
+                    <p class="paragraph u-mb-small">Pokud píšeme kód, tak jej píšeme v pro člověka čitelné podobě. Pokud jej ale chce počítač spustit, tak si jej musí převést na nějakou jinou podobu. Některé programovací jazyky se převádějí do strojového kódu pomocí kompilátoru, některé jsou interpretovány interpretem když chceme kód spustit. S převodem textu na nějakou jinou strukturu se setkáváme často. Například při zobrazení webové stránky prohlížečem. Prohlížeč musí neprve HTML kód převést na nějakou datovou strukturu, než stránku zobrazí. Vytváří se DOM (Document Object Model).</p>
+                    <p class="paragraph u-mb-small">Interpreter je komponenta, která zpracovává strukturovaná textová data a převádí je například na nějakou objektově orientovanou strukturu. Můžeme jej chtít použít, když děláme nějaký program, který například počítá textově zadané matematické výrazy.</p>
+                    <p class="paragraph u-mb-small">Při převádění textu na nějakou datovou strukturu většinou probíhají tyto dvě fáze:</p>
+                    <ul class="unordered-list u-mb-medium">
+                        <li><b>Lexing</b> - předělávání textu na tokeny</li>
+                        <li><b>Parsing</b> - předělávání tokenů na nějakou strukturu</li>
+                    </ul>
+                    <h2 class="heading-secondary u-mb-tiny">Příklad - Lexing</h2>
+                    <p class="paragraph u-mb-small">Budeme chtít napsat kód, který počítá textově zadané matematické výrazy. Když například zadáme řetězec "(15+4)-(13-2)", tak chceme dostat výsledek 8. První krok, který bychom měli udělat, je převést zadaný text na tokeny. Co to token je uvidíte v ukázce. Provedeme tedy lexing.</p>
+                    <p class="paragraph u-mb-small">Následující ukázka ukazuje funkci lex, která bere textový vstup a vrací pole tokenů.</p>
+                    <pre class="code-box u-mb-medium"><code>const TypTokenu = Object.freeze({
+    cislo: 0,
+    plus: 1,
+    minus: 2,
+    levaZavorka: 3,
+    pravaZavorka: 4
+});
+
+class Token {
+    constructor(typ, text) {
+        this.typ = typ;
+        this.text = text;
+    }
+
+    // abychom si mohli vypsat, co token obsahuje
+    // za text, tak implementujeme metodu toString
+    toString() {
+        return this.text;
+    }
+}
+
+
+// funkce pro získání pole tokenů podle předaného textu
+function lex(input) {
+    // do tohoto pole se postupně přidají tokenu
+    const vysledek = [];
+
+    for (let i = 0; i &lt; input.length; i++) {
+        // podle toho o jaký znak se jedná se vytvoří token
+        switch (input[i]) {
+            case "+":
+                vysledek.push(new Token(TypTokenu.plus, "+"));
+                break;
+            case "-":
+                vysledek.push(new Token(TypTokenu.minus, "-"));
+                break;
+            case "(":
+                vysledek.push(new Token(TypTokenu.levaZavorka, "("));
+                break;
+            case ")":
+                vysledek.push(new Token(TypTokenu.pravaZavorka, ")"));
+                break;
+            default:
+                // pokud se narazí na číselný znak (nebo tečku), tak se zjistí
+                // jestli se za tímto znakem nenachází ještě nějaké číslo
+
+                // do tohoto pole se uloží znaky po sobě jdoucích čísel
+                const buffer = [input[i]];
+                // text se prochází od znaku pod indexem i
+                for (let j = i+1; j &lt; input.length; j++) {
+                    if ('0123456789.'.includes(input[j])) {
+                        // pokud se na tomto místě nachází číslo, přidá se do pole buffer
+                        buffer.push(input[j]);
+                        i++;
+                    } else {
+                        // pokud se na tomto místě již nenachází číslo, tak se čísla
+                        // v poli buffer sjednotí do jednoho textu podle kterého se
+                        // vytvoří číselný token a ten se přidá do pole vysledek
+                        vysledek.push(new Token(TypTokenu.cislo, buffer.join("")));
+                        break;
+                    }
+                }
+                break;
+        }
+    }
+    // vrácení pole tokenů
+    return vysledek;
+}
+
+
+const input = "(15+4)-(13-2)";
+// převedení textu na tokeny
+let tokeny = lex(input);
+
+// vypsání textu tokenů
+console.log(tokeny.join('|'));
+// vypíše se: (|15|+|4|)|-|(|13|-|2|)</code></pre>
+                    <h2 class="heading-secondary u-mb-tiny">Příklad - Parsing</h2>
+                    <p class="paragraph u-mb-small">V minulé ukázce jsme si vytvořili funkci na převedení textu na tokeny. Teď můžeme tyto tokeny použít k vytvoření nějaké datové struktury, s kterou potom budeme moci pracovat.</p>
+                    <p class="paragraph u-mb-small">Následující ukázka ukazuje funkci parse, která bere jako parametr pole tokenů a vytváří stromovou datovou strukturu, kterou na konci vrací.</p>
+                    <pre class="code-box u-mb-medium"><code>const TypTokenu = Object.freeze({
+    cislo: 0,
+    plus: 1,
+    minus: 2,
+    levaZavorka: 3,
+    pravaZavorka: 4
+});
+
+const Operace = Object.freeze({
+    scitani: 0,
+    odcitani: 1
+});
+
+class Token {
+    constructor(typ, text) {
+        this.typ = typ;
+        this.text = text;
+    }
+}
+
+class Cislo {
+    constructor(hodnota) {
+        this.hodnota = hodnota;
+    }
+}
+
+class BinarniOperace {
+    constructor() {
+        this.typ = null;
+        this.levaStrana = null;
+        this.pravaStrana = null;
+    }
+
+    get hodnota() {
+        switch (this.typ) {
+            case Operace.scitani:
+                return this.levaStrana.hodnota + this.pravaStrana.hodnota;
+            case Operace.odcitani:
+                return this.levaStrana.hodnota - this.pravaStrana.hodnota;
+        }
+        return 0;
+    }
+}
+
+
+// funkce pro získání pole tokenů podle předaného textu
+function lex(input) {
+    const vysledek = [];
+
+    for (let i = 0; i &lt; input.length; i++) {
+        switch (input[i]) {
+            case "+":
+                vysledek.push(new Token(TypTokenu.plus, "+"));
+                break;
+            case "-":
+                vysledek.push(new Token(TypTokenu.minus, "-"));
+                break;
+            case "(":
+                vysledek.push(new Token(TypTokenu.levaZavorka, "("));
+                break;
+            case ")":
+                vysledek.push(new Token(TypTokenu.pravaZavorka, ")"));
+                break;
+            default:
+                const buffer = [input[i]];
+                for (let j = i+1; j &lt; input.length; j++) {
+                    if ('0123456789.'.includes(input[j])) {
+                        buffer.push(input[j]);
+                        i++;
+                    } else {
+                        vysledek.push(new Token(TypTokenu.cislo, buffer.join("")));
+                        break;
+                    }
+                }
+                break;
+        }
+    }
+    return vysledek;
+}
+
+// funkce pro získání datové struktury podle předaných tokenů
+function parse(tokeny) {
+    // tento root objekt se na konci vrátí
+    // - bude to taková stromová datová struktura
+    const vysledek = new BinarniOperace();
+    // určuje jestli má operace vysledek nastavenou levou stranu
+    let maLevouStranu = false;
+
+    // tokeny se postupně projdou
+    for (let i = 0; i &lt; tokeny.length; i++) {
+        let token = tokeny[i];
+
+        // podle typu tokenu se provede požadovaná operace
+        switch (token.typ) {
+            case TypTokenu.cislo:
+                // pokud se jedná o token typu číslo, tak se přidá
+                // na jednu stranu binární operace vysledek
+                const cislo = new Cislo(parseInt(token.text));
+                if (!maLevouStranu) {
+                    vysledek.levaStrana = cislo;
+                    maLevouStranu = true;
+                } else {
+                    vysledek.pravaStrana = cislo;
+                }
+                break;
+            case TypTokenu.plus:
+                // nastavení typu operace na sčítání
+                vysledek.typ = Operace.scitani;
+                break;
+            case TypTokenu.minus:
+                // nastavení typu operace na odčítání
+                vysledek.typ = Operace.odcitani;
+                break;
+            case TypTokenu.levaZavorka:
+                // pokud se jedná o token typu leva zavorka, tak se najde
+                // pozice pravé závorky a rekurzivně se zavolá funkce parse
+                let j = i;
+                for (; j &lt; tokeny.length; j++)
+                    if (tokeny[j].typ === TypTokenu.pravaZavorka) break;
+                // získání podvýrazu (tokeny od levé závorky k pravé)
+                let podvyraz = tokeny.slice(i+1, j);
+                // rekurzivní zavolání funkce parse s podvýrazem jako parametr
+                const element = parse(podvyraz);
+                // přidání binární operace element na
+                // jednu stranu binární operace vysledek
+                if (!maLevouStranu) {
+                    vysledek.levaStrana = element;
+                    maLevouStranu = true;
+                } else {
+                    vysledek.pravaStrana = element;
+                }
+                // bude se pokračovat od pravé závorky
+                i = j;
+                break;
+        }
+    }
+    // vrácení vytvořené struktury
+    return vysledek;
+}
+
+
+const input = "(15+4)-(13-2)";
+// převedení textu na tokeny
+let tokeny = lex(input);
+
+// převedení tokenů na datovou strukturu
+let struktura = parse(tokeny);
+
+// vypsání výsledku
+console.log(`Výsledek: ${struktura.hodnota}`);</code></pre>
+                    <div class="u-text-center">
+                        <a href="#" class="button-primary">pokračovat na další část</a>
+                    </div>
+                </div>
+                <div class="article-page__lateral-side">
+                    <div class="article-page__sticky-content">
+                        <nav class="navigation">
+                            <ul>
+                                <li class="navigation__group">
+                                    <ul>
+                                        <li><a class="navigation__link" href="../navrhove-principy/">Návrhové principy</a></li>
+                                    </ul>
+                                </li>
+                                <li class="navigation__group">Creational
+                                    <ul>
+                                        <li><a class="navigation__link" href="../builder/">Builder</a></li>
+                                        <li><a class="navigation__link" href="../factory/">Factory</a></li>
+                                        <li><a class="navigation__link" href="../prototype/">Prototype</a></li>
+                                        <li><a class="navigation__link" href="../singleton/">Singleton</a></li>
+                                    </ul>
+                                </li>
+                                <li class="navigation__group">Structural
+                                    <ul>
+                                        <li><a class="navigation__link" href="../adapter/">Adapter</a></li>
+                                        <li><a class="navigation__link" href="../bridge/">Bridge</a></li>
+                                        <li><a class="navigation__link" href="../composite/">Composite</a></li>
+                                        <li><a class="navigation__link" href="../decorator/">Decorator</a></li>
+                                        <li><a class="navigation__link" href="../facade/">Facade</a></li>
+                                        <li><a class="navigation__link" href="../flyweight/">Flyweight</a></li>
+                                        <li><a class="navigation__link" href="../proxy/">Proxy</a></li>
+                                    </ul>
+                                </li>
+                                <li class="navigation__group">Behavioral
+                                    <ul>
+                                        <li><a class="navigation__link" href="../chain-of-responsibility/">Chain of responsibility</a></li>
+                                        <li><a class="navigation__link" href="../command/">Command</a></li>
+                                        <li><a class="navigation__link navigation__link--active" href="../interpreter/">Interpreter</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
