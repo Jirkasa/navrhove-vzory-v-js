@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=yes maximum-scale=2.2 minimum-scale=1.0">
+    <title>Návrhové vzory v JS - Mediator</title>
+
+    <script src="../media/js/libraries/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+
+    <link rel="stylesheet" href="../media/css/style.css">
+</head>
+<body>
+    <div class="page">
+        <header class="header">
+            <div class="header__content">
+                <h2 class="header__title"><span>Návrhové vzory</span> v JS</h2>
+                <nav class="header__nav">
+                    <ul>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+        <div class="article-page">
+            <div class="article-page__content">
+                <div class="article-page__main-side">
+                    <h1 class="heading-primary u-mb-small">Mediator</h1>
+                    <hr class="horizontal-rule u-mb-small">
+                    <p class="paragraph u-mb-medium">V této části se podíváme na Mediator. Tento návrhový vzor usnadňuje komunikaci mezi různými komponentami.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Proč Mediator použít</h2>
+                    <p class="paragraph u-mb-medium">U některých komponent, které mezi sebou komunikují nedává smysl aby mezi sebou měli přímé reference. Například když mohou do našeho systému kdykoliv vstoupit nebo z něj vystoupit. Když si například představíme nějakou chatovací místnost, tak namísto toho abychom uživatele mezi sebou různě propojovali je jen napojíme na nějakou centrální komponentu, která mezi nimi zprostředkovává komunikaci.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Příklad - Chatovací místnost</h2>
+                    <p class="paragraph u-mb-small">Následující ukázka ukazuje třídu ChatRoom a třídu Clovek. Třída ChatRoom představuje chatovací místnost a třída Clovek uživatele, kteří se k této místnosti mohou připojit a mohou mezi sebou komunikovat.</p>
+                    <pre class="code-box u-mb-medium"><code>class Clovek {
+    constructor(jmeno) {
+        this.jmeno = jmeno;
+        this.chatLog = [];
+    }
+
+    // tuto metodu může Mediator (chatovací místnost)
+    // použít k poslání zprávy uživateli
+    prijmi(odesilatel, zprava) {
+        const text = `${odesilatel}: ${zprava}`;
+        console.log(`[chat uživatele ${this.jmeno}] ${text}`);
+        this.chatLog.push(text);
+    }
+
+    posli(zprava) {
+        // poslání zprávy do chatovací místnosti
+        this.room.broadcast(this.jmeno, zprava);
+    }
+
+    posliPrivatniZpravu(cil, zprava) {
+        // poslání soukromé zprávy přes chatovací místnost
+        this.room.zprava(this.jmeno, cil, zprava);
+    }
+}
+
+// Mediator (chatovací místnost)
+// - zajišťuje komunikaci mezi objekty třídy Clovek
+class ChatRoom {
+    constructor() {
+        // v tomto poli jsou uloženi lidé, kteří
+        // jsou k chatovací místnosti připojeni
+        this.lide = [];
+    }
+
+    // tuto metodu mohou uživatelé použít k poslání
+    // zprávy všem uživatelům v místnosti
+    broadcast(zdroj, zprava) {
+        for (let uzivatel of this.lide) {
+            if (uzivatel.jmeno !== zdroj)
+                uzivatel.prijmi(zdroj, zprava);
+        }
+    }
+
+    // pomocí této metody se může uživatel
+    // připojit k místnosti
+    pripojit(uzivatel) {
+        let zprava = `${uzivatel.jmeno} se připojil`;
+        this.broadcast("room", zprava);
+
+        uzivatel.room = this;
+        this.lide.push(uzivatel);
+    }
+
+    // tuto metodu mohou uživatelé použít k poslání
+    // soukromé zprávy nějakému uživateli
+    zprava(zdroj, cil, zprava) {
+        for (let uzivatel of this.lide) {
+            if (uzivatel.jmeno === cil) {
+                uzivatel.prijmi(zdroj, zprava);
+                break;
+            }
+        }
+    }
+}
+
+
+// vytvoření Mediatoru (chatovací místnosti)
+const room = new ChatRoom();
+
+const karel = new Clovek("Karel");
+const pavel = new Clovek("Pavel");
+
+// připojení lidí k chatovací místnosti
+room.pripojit(karel);
+room.pripojit(pavel);
+
+// lidé mohou použít chatovací místnost k posílání zpráv
+karel.posli("Zdravím");
+pavel.posli("Zdar Karle");
+
+const ivan = new Clovek("Ivan");
+
+// připojení dalšího člověka do chatovací místnosti
+room.pripojit(ivan);
+
+// poslání zprávy
+ivan.posli("Čau všichni");
+
+// poslání soukromé zprávy od Karla Ivanovi
+karel.posliPrivatniZpravu("Ivan", "Vítej Ivane");
+
+
+// výsledný výstup bude takový:
+// [chat uživatele Karel] room: Pavel se připojil
+// [chat uživatele Pavel] Karel: Zdravím
+// [chat uživatele Karel] Pavel: Zdar Karle
+// [chat uživatele Karel] room: Ivan se připojil
+// [chat uživatele Pavel] room: Ivan se připojil
+// [chat uživatele Karel] Ivan: Čau všichni
+// [chat uživatele Pavel] Ivan: Čau všichni
+// [chat uživatele Ivan] Karel: Vítej Ivane</code></pre>
+                    <div class="u-text-center">
+                        <a href="#" class="button-primary">pokračovat na další část</a>
+                    </div>
+                </div>
+                <div class="article-page__lateral-side">
+                    <div class="article-page__sticky-content">
+                        <nav class="navigation">
+                            <ul>
+                                <li class="navigation__group">
+                                    <ul>
+                                        <li><a class="navigation__link" href="../navrhove-principy/">Návrhové principy</a></li>
+                                    </ul>
+                                </li>
+                                <li class="navigation__group">Creational
+                                    <ul>
+                                        <li><a class="navigation__link" href="../builder/">Builder</a></li>
+                                        <li><a class="navigation__link" href="../factory/">Factory</a></li>
+                                        <li><a class="navigation__link" href="../prototype/">Prototype</a></li>
+                                        <li><a class="navigation__link" href="../singleton/">Singleton</a></li>
+                                    </ul>
+                                </li>
+                                <li class="navigation__group">Structural
+                                    <ul>
+                                        <li><a class="navigation__link" href="../adapter/">Adapter</a></li>
+                                        <li><a class="navigation__link" href="../bridge/">Bridge</a></li>
+                                        <li><a class="navigation__link" href="../composite/">Composite</a></li>
+                                        <li><a class="navigation__link" href="../decorator/">Decorator</a></li>
+                                        <li><a class="navigation__link" href="../facade/">Facade</a></li>
+                                        <li><a class="navigation__link" href="../flyweight/">Flyweight</a></li>
+                                        <li><a class="navigation__link" href="../proxy/">Proxy</a></li>
+                                    </ul>
+                                </li>
+                                <li class="navigation__group">Behavioral
+                                    <ul>
+                                        <li><a class="navigation__link" href="../chain-of-responsibility/">Chain of responsibility</a></li>
+                                        <li><a class="navigation__link" href="../command/">Command</a></li>
+                                        <li><a class="navigation__link" href="../interpreter/">Interpreter</a></li>
+                                        <li><a class="navigation__link" href="../iterator/">Iterator</a></li>
+                                        <li><a class="navigation__link navigation__link--active" href="../mediator/">Mediator</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
