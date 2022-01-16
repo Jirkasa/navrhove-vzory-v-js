@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=yes maximum-scale=2.2 minimum-scale=1.0">
+    <title>Návrhové vzory v JS - Iterator</title>
+
+    <script src="../media/js/libraries/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+
+    <link rel="stylesheet" href="../media/css/style.css">
+</head>
+<body>
+    <div class="page">
+        <header class="header">
+            <div class="header__content">
+                <h2 class="header__title"><span>Návrhové vzory</span> v JS</h2>
+                <nav class="header__nav">
+                    <ul>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+        <div class="article-page">
+            <div class="article-page__content">
+                <div class="article-page__main-side">
+                    <h1 class="heading-primary u-mb-small">Iterator</h1>
+                    <hr class="horizontal-rule u-mb-small">
+                    <p class="paragraph u-mb-medium">V této části si ukážeme návrhový vzor Iterator. Tento návrhový vzor slouží pro procházení položek různých datových struktur.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Proč Iterator použít</h2>
+                    <p class="paragraph u-mb-small">Iterator můžeme chtít použít, pokud chceme procházet nějakou datovou strukturu. S pomocí Iteratoru můžeme postupně navštívit každou položku datové struktury.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Tvorba Iteratoru v JavaScriptu</h2>
+                    <p class="paragraph u-mb-tiny">JavaScript umožňuje Iterator vytvořit implementací metody [Symbol.iterator]. Jedná se o speciální metodu, pomocí které můžeme například umožnit procházet objekt pomocí for of cyklu. Tato metoda musí vrátit objekt obsahující metodu next, která se použije v každé iteraci for of cyklu. Metoda next musí vracet objekt s těmito dvěmi vlastnostmi:</p>
+                    <ul class="unordered-list u-mb-small">
+                        <li><b>value</b> - hodnota, kterou iterator vrátí (pokud je vlastnost done true, tak může být tato vlastnost vynechána)</li>
+                        <li><b>done</b> - určuje, jestli je již iterator hotový (true/false)</li>
+                    </ul>
+                    <p class="paragraph u-mb-small">Následující ukázka použití metody [Symbol.iterator] ukazuje.</p>
+                    <pre class="code-box u-mb-small"><code>class Iterator {
+    constructor(pocet) {
+        this.pocet = pocet;
+    }
+
+    // protože objekt implementuje metodu [Symbol.iterator], stává
+    // se iterable, kterou můžeme použít třeba ve for of cyklu
+    [Symbol.iterator]() {
+        let cislo = 0;
+        let pocet = this.pocet;
+        let pocetIteraci = 0;
+        // metoda vrací objekt s metodou next, která bude
+        // volána pro každou iteraci
+        return {
+            next() {
+                cislo += 10;
+                return {
+                    // hodnota, která se vrátí
+                    value: cislo,
+                    // určuje jestli iterator skončil
+                    done: pocetIteraci++ === pocet
+                }
+            }
+        }
+    }
+}
+
+const iterator = new Iterator(10);
+
+// procházení objektu iterator pomocí for of cyklu
+for (let cislo of iterator)
+    console.log(cislo);
+// vypíše se:
+// 10
+// 20
+// 30
+// 40
+// 50
+// 60
+// 70
+// 80
+// 90
+// 100</code></pre>
+                    <h3 class="heading-tertiary u-mb-tiny">Klíčové slovo yield</h3>
+                    <p class="paragraph u-mb-small">Pro pohodlnější iterování můžeme použít klíčové slovo yield. Klíčové slovo yield můžeme v JavaScriptu používat v generator funkcích, které vracejí Generator objekt. Generator funkci vytvoříme tak, že při deklaraci funkce zapíšeme za klíčové slovo function hvězdičku (*).</p>
+                    <p class="paragraph u-mb-small">Pomocí klíčového slova yield můžeme v generator funkcích pozastavit provádění kódu a vrátit nějakou hodnotu. Následující ukázka ukazuje jak to funguje.</p>
+                    <pre class="code-box u-mb-small"><code>// deklarace generator funkce
+function* generator() {
+    yield 10;
+    yield 20;
+    yield 30;
+    yield 40;
+    yield 50;
+}
+
+// vytvoření Generator objektu
+// - generator funkce vracejí Generator objekt
+const gen = generator();
+
+// po každém zavolání metody next objektu gen se kód pozastaví
+// na klíčovém slovu yield a vrátí se objekt s hodnotou, kterou vrací
+// - metoda next vrací objekt s vlastnostmi value a done
+console.log(gen.next().value); // 10
+console.log(gen.next().value); // 20
+console.log(gen.next().value); // 30
+console.log(gen.next().value); // 40
+console.log(gen.next().value); // 50</code></pre>
+                    <p class="paragraph u-mb-small">Pokud v generator funkci použijeme klíčové slovo return, tak se generator ukončí. Následující ukázka to ukazuje.</p>
+                    <pre class="code-box u-mb-small"><code>function* generator() {
+    yield 10;
+    yield 20;
+    yield 30;
+    return 40;
+    yield 50; // k tomuto řádku se již nedojde
+}
+
+const gen = generator();
+
+console.log(gen.next()); // {value: 10, done: false}
+console.log(gen.next()); // {value: 20, done: false}
+console.log(gen.next()); // {value: 30, done: false}
+console.log(gen.next()); // {value: 40, done: true}
+console.log(gen.next()); // {value: undefined, done: true}</code></pre>
+                    <p class="paragraph u-mb-small">Při volání metody next můžeme předávat také argument, který se v generator funkci nahradí za klíčové slovo yield. Následující ukázka ukazuje generator funkci k vypisování textu do konzole.</p>
+                    <pre class="code-box u-mb-small"><code>function* logGenerator() {
+    console.log("0");
+    console.log("1", yield);
+    console.log("2", yield);
+    console.log("3", yield);
+}
+
+const gen = logGenerator();
+
+gen.next(); // první zavolání funkce next dojde k prvnímu klíčovému slovu yield
+gen.next("creational");
+gen.next("structural");
+gen.next("behavioral");</code></pre>
+                    <p class="paragraph u-mb-small">Jako generator funkci můžeme označit také metodu [Symbol.iterator] a v některých případech si tak usnadnit její implementaci. Následující ukázka ukazuje předělanou metodu [Symbol.iterator] třídy Iterator, která byla ukázána dříve. Určitě uznáte že teď vypadá mnohem lépe.</p>
+                    <pre class="code-box u-mb-small"><code>class Iterator {
+    constructor(pocet) {
+        this.pocet = pocet;
+    }
+
+    // implementace metody [Symbol.iterator]
+    // s použitím klíčového slova yield
+    *[Symbol.iterator]() {
+        let cislo = 0;
+        while (cislo &lt; 100) {
+            cislo += 10;
+            yield cislo;
+        }
+    }
+}
+
+const iterator = new Iterator(10);
+
+// procházení objektu iterator pomocí for of cyklu
+for (let cislo of iterator)
+    console.log(cislo);
+// vypíše se:
+// 10
+// 20
+// 30
+// 40
+// 50
+// 60
+// 70
+// 80
+// 90
+// 100</code></pre>
+                    <h3 class="heading-tertiary u-mb-tiny">Umožnění jiných způsobů iterování</h3>
+                    <p class="paragraph u-mb-small">Objekt může mít jen jednu metodu [Symbol.iterator]. Pokud ale chceme umožnit více způsobů iterování přes objekt, tak si můžeme vytvořit metody, které vrací nový objekt s vlastní metodou [Symbol.iterator], kterou můžeme použít k iteraci. Jak to můžeme udělat ukazuje následující ukázka.</p>
+                    <pre class="code-box u-mb-medium"><code>class Iterator {
+    constructor() {
+        this.hodnoty = [5, 3, 4, 7, 2];
+    }
+
+    *[Symbol.iterator]() {
+        for (let hodnota of this.hodnoty) {
+            yield hodnota;
+        }
+    }
+
+    // getter pro iterování pozpátku
+    get pozpatku() {
+        const hodnoty = this.hodnoty;
+
+        // vrací se nový objekt s metodou [Symbol.iterator]
+        return {
+            *[Symbol.iterator]() {
+                for (let i = hodnoty.length-1; i >= 0; i--) {
+                    yield hodnoty[i];
+                }
+            }
+        }
+    }
+}
+
+
+const iterator = new Iterator();
+
+// procházení objektu iterator
+for (let hodnota of iterator)
+    console.log(hodnota);
+// hodnoty se vypíší v tomto pořadí: 5, 3, 4, 7, 2
+
+// procházení objektu iterator pozpatku
+for (let hodnota of iterator.pozpatku)
+    console.log(hodnota);
+// hodnoty se vypíší v tomto pořadí: 2, 7, 4, 3, 5</code></pre>
+                    <h2 class="heading-secondary u-mb-tiny">Příklad - Procházení Tree</h2>
+                    <p class="paragraph u-mb-small">Jako příklad použití Iteratoru si ukážeme procházení stromové datové struktury. Následující ukázka ukazuje Binary Search Tree o kterém si můžete přečíst na mých stránkách o <a href="https://jirkasa.github.io/algoritmy-a-datove-struktury-v-js/binary-search-tree/" target="_blank" class="anchor">algoritmech a datových strukturách v JS</a>. Obsahuje metodu insert pro vložení nové položky a metodu [Symbol.iterator] pro Depth First procházení. Jak metoda insert a depth first procházení funguje se můžete dozvědět na mých stránkách. Následující ukázka jen předělává metodu <a href="https://jirkasa.github.io/algoritmy-a-datove-struktury-v-js/tree-traversing/#depth-first-search-pre-order" target="_blank" class="anchor">DFSPreOrder</a>, která je na mých stránkách popsána, aby se Tree dal procházet pomocí for of cyklu.</p>
+                    <pre class="code-box u-mb-medium"><code>class Node {
+    constructor(value) {
+        this.value = value;
+        this.left = null;
+        this.right = null;
+    }
+}
+
+class BinarySearchTree {
+    constructor() {
+        this.root = null;
+    }
+
+    insert(value) {
+        const newNode = new Node(value);
+
+        if (!this.root) {
+            this.root = newNode;
+            return this;
+        }
+
+        let current = this.root;
+
+        while (true) {
+            if (value === current.value) return undefined;
+            if (value > current.value) {
+                if (!current.right) {
+                    current.right = newNode;
+                    return this;
+                }
+                current = current.right;
+            } else {
+                if (!current.left) {
+                    current.left = newNode;
+                    return this;
+                }
+                current = current.left;
+            }
+        }
+    }
+
+    *[Symbol.iterator]() {
+        const traverse = function*(node) {
+            yield node.value;
+            if (node.left) yield * traverse(node.left);
+            if (node.right) yield * traverse(node.right);
+        }
+
+        yield * traverse(this.root);
+    }
+}
+
+const tree = new BinarySearchTree();
+tree.insert(10).insert(5).insert(16).insert(13).insert(6).insert(2);
+tree.insert(17).insert(7).insert(3).insert(14).insert(11);
+
+// procházení Tree pomocí for of cyklu
+for (let hodnota of tree)
+    console.log(hodnota);
+// hodnoty se vypíší v tomto pořadí:
+// 10, 5, 2, 3, 6, 7, 16, 13, 11, 14, 17</code></pre>
+                    <div class="u-text-center">
+                        <a href="#" class="button-primary">pokračovat na další část</a>
+                    </div>
+                </div>
+                <div class="article-page__lateral-side">
+                    <div class="article-page__sticky-content">
+                        <nav class="navigation">
+                            <ul>
+                                <li class="navigation__group">
+                                    <ul>
+                                        <li><a class="navigation__link" href="../navrhove-principy/">Návrhové principy</a></li>
+                                    </ul>
+                                </li>
+                                <li class="navigation__group">Creational
+                                    <ul>
+                                        <li><a class="navigation__link" href="../builder/">Builder</a></li>
+                                        <li><a class="navigation__link" href="../factory/">Factory</a></li>
+                                        <li><a class="navigation__link" href="../prototype/">Prototype</a></li>
+                                        <li><a class="navigation__link" href="../singleton/">Singleton</a></li>
+                                    </ul>
+                                </li>
+                                <li class="navigation__group">Structural
+                                    <ul>
+                                        <li><a class="navigation__link" href="../adapter/">Adapter</a></li>
+                                        <li><a class="navigation__link" href="../bridge/">Bridge</a></li>
+                                        <li><a class="navigation__link" href="../composite/">Composite</a></li>
+                                        <li><a class="navigation__link" href="../decorator/">Decorator</a></li>
+                                        <li><a class="navigation__link" href="../facade/">Facade</a></li>
+                                        <li><a class="navigation__link" href="../flyweight/">Flyweight</a></li>
+                                        <li><a class="navigation__link" href="../proxy/">Proxy</a></li>
+                                    </ul>
+                                </li>
+                                <li class="navigation__group">Behavioral
+                                    <ul>
+                                        <li><a class="navigation__link" href="../chain-of-responsibility/">Chain of responsibility</a></li>
+                                        <li><a class="navigation__link" href="../command/">Command</a></li>
+                                        <li><a class="navigation__link" href="../interpreter/">Interpreter</a></li>
+                                        <li><a class="navigation__link navigation__link--active" href="../iterator/">Iterator</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
