@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=yes maximum-scale=2.2 minimum-scale=1.0">
+    <title>Návrhové vzory v JS - Memento</title>
+
+    <script src="../media/js/libraries/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+
+    <link rel="stylesheet" href="../media/css/style.css">
+</head>
+<body>
+    <div class="page">
+        <header class="header">
+            <div class="header__content">
+                <h2 class="header__title"><span>Návrhové vzory</span> v JS</h2>
+                <nav class="header__nav">
+                    <ul>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+        <div class="article-page">
+            <div class="article-page__content">
+                <div class="article-page__main-side">
+                    <h1 class="heading-primary u-mb-small">Memento</h1>
+                    <hr class="horizontal-rule u-mb-small">
+                    <p class="paragraph u-mb-medium">V této části se podíváme na návrhový vzor Memento. Tento návrhový vzor je o tom, že si například můžeme uložit stav nějakého objektu a díky tomu jej v budoucnu obnovit.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Proč Memento použít</h2>
+                    <p class="paragraph u-mb-small">Objekt nebo systém může postupem času procházet různými změnami. Pokud chceme tyto změny ukládat, tak máme více možností. Jednou z nich je použít návrhový vzor <a class="anchor" href="../command/">Command</a>. Další může být použít návrhový vzor Memento, o kterém je tato část.</p>
+                    <p class="paragraph u-mb-medium">Narozdíl od návrhového vzoru Command, kde si ukládáme provedené operace, si při použití Mementa ukládáme aktuální stav systému nebo objektu.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Příklad - Uložení stavu objektu</h2>
+                    <p class="paragraph u-mb-small">Následující ukázka ukazuje třídu BankovniUcet, která reprezentuje bankovní účet. Pomocí metod vlozit a vybrat můžeme s bankovním účtem manipulovat. Tyto metody vracejí memento uchovávající stav účtu po provedení jejich operace, které si můžeme uschovat a později jej použít k obnovení účtu.</p>
+                    <pre class="code-box u-mb-medium"><code>// Memento pro třídu BankovniUcet
+class Memento {
+    constructor(zustatek) {
+        this.zustatek = zustatek;
+    }
+}
+
+class BankovniUcet {
+    constructor(zustatek = 0) {
+        this.zustatek = zustatek;
+    }
+
+    vlozit(castka) {
+        this.zustatek += castka;
+        // po provedení operace se vrátí nové memento
+        return new Memento(this.zustatek);
+    }
+
+    vybrat(castka) {
+        this.zustatek -= castka;
+        // po provedení operace se vrátí nové memento
+        return new Memento(this.zustatek);
+    }
+
+    obnovit(memento) {
+        this.zustatek = memento.zustatek;
+    }
+
+    toString() {
+        return `Zůstatek: ${this.zustatek}`;
+    }
+}
+
+
+const ucet = new BankovniUcet(150);
+console.log(ucet.toString());
+
+// když provedeme s objektem ucet nějakou operaci, tak se nám vrátí
+// memento, pomocí kterého můžeme objekt v budoucnu obnovit
+const m1 = ucet.vybrat(50);
+const m2 = ucet.vlozit(25);
+
+console.log(ucet.toString());
+
+// obnovení stavu objektu ucet pomocí mementa m1
+ucet.obnovit(m1);
+
+console.log(ucet.toString());</code></pre>
+                    <h2 class="heading-secondary u-mb-tiny">Příklad - Implementace undo/redo funkcionality</h2>
+                    <p class="paragraph u-mb-small">Memento můžeme použít k implementaci undo/redo funkcionality. Následující ukázka přidává třídě BankovniUcet z minulého příkladu metody undo a redo. Pomocí těchto metod se můžeme vracet o operaci zpět nebo dopředu.</p>
+                    <pre class="code-box u-mb-medium"><code>class Memento {
+    constructor(zustatek) {
+        this.zustatek = zustatek;
+    }
+}
+
+class BankovniUcet {
+    constructor(zustatek = 0) {
+        this.zustatek = zustatek;
+        // v tomto poli se ukládají vytvořená mementa
+        this.zmeny = [new Memento(zustatek)];
+        // tato vlastnost udává index mementa v poli zmeny,
+        // které odpovídá aktuálnímu stavu bankovnímu účtu
+        this.aktualni = 0;
+    }
+
+    vlozit(castka) {
+        this.zustatek += castka;
+        // vytvoří se nové memento a přidá se do pole zmeny
+        let m = new Memento(this.zustatek);
+        this.zmeny.push(m);
+        this.aktualni++;
+        // memento se vrací, pokud bychom si jej chtěli někde uložit
+        return m;
+    }
+
+    vybrat(castka) {
+        this.zustatek -= castka;
+        // vytvoří se nové memento a přidá se do pole zmeny
+        let m = new Memento(this.zustatek);
+        this.zmeny.push(m);
+        this.aktualni++;
+        // memento se vrací, pokud bychom si jej chtěli někde uložit
+        return m;
+    }
+
+    // metoda pro obnovení účtu podle předaného mementa
+    obnovit(memento) {
+        if (memento) {
+            this.zustatek = memento.zustatek;
+            this.zmeny.push(memento);
+            this.aktualni = this.zmeny.length-1;
+        }
+    }
+
+    // pomocí této metody se můžeme vrátit o operaci zpět
+    undo() {
+        if (this.aktualni &gt; 0) {
+            let m = this.zmeny[--this.aktualni];
+            this.zustatek = m.zustatek;
+            return m;
+        }
+        return null;
+    }
+
+    // pomocí této metody se můžeme posunout o operaci dopředu
+    redo() {
+        if (this.aktualni+1 &lt; this.zmeny.length) {
+            let m = this.zmeny[++this.aktualni];
+            this.zustatek = m.zustatek;
+            return m;
+        }
+        return null;
+    }
+
+    toString() {
+        return `Zůstatek: ${this.zustatek}`;
+    }
+}
+
+
+const ucet = new BankovniUcet(100);
+ucet.vlozit(50);
+ucet.vybrat(25);
+
+console.log(ucet.toString());
+
+// pomocí metod undo a redo se můžeme
+// vracet o změnu zpět a vpřed
+ucet.undo();
+console.log("Undo 1: " + ucet.toString());
+ucet.undo();
+console.log("Undo 2: " + ucet.toString());
+ucet.redo();
+console.log("Redo: " + ucet.toString());</code></pre>
+                    <div class="u-text-center">
+                        <a href="#" class="button-primary">pokračovat na další část</a>
+                    </div>
+                </div>
+                <div class="article-page__lateral-side">
+                    <div class="article-page__sticky-content">
+                        <nav class="navigation">
+                            <ul>
+                                <li class="navigation__group">
+                                    <ul>
+                                        <li><a class="navigation__link" href="../navrhove-principy/">Návrhové principy</a></li>
+                                    </ul>
+                                </li>
+                                <li class="navigation__group">Creational
+                                    <ul>
+                                        <li><a class="navigation__link" href="../builder/">Builder</a></li>
+                                        <li><a class="navigation__link" href="../factory/">Factory</a></li>
+                                        <li><a class="navigation__link" href="../prototype/">Prototype</a></li>
+                                        <li><a class="navigation__link" href="../singleton/">Singleton</a></li>
+                                    </ul>
+                                </li>
+                                <li class="navigation__group">Structural
+                                    <ul>
+                                        <li><a class="navigation__link" href="../adapter/">Adapter</a></li>
+                                        <li><a class="navigation__link" href="../bridge/">Bridge</a></li>
+                                        <li><a class="navigation__link" href="../composite/">Composite</a></li>
+                                        <li><a class="navigation__link" href="../decorator/">Decorator</a></li>
+                                        <li><a class="navigation__link" href="../facade/">Facade</a></li>
+                                        <li><a class="navigation__link" href="../flyweight/">Flyweight</a></li>
+                                        <li><a class="navigation__link" href="../proxy/">Proxy</a></li>
+                                    </ul>
+                                </li>
+                                <li class="navigation__group">Behavioral
+                                    <ul>
+                                        <li><a class="navigation__link" href="../chain-of-responsibility/">Chain of responsibility</a></li>
+                                        <li><a class="navigation__link" href="../command/">Command</a></li>
+                                        <li><a class="navigation__link" href="../interpreter/">Interpreter</a></li>
+                                        <li><a class="navigation__link" href="../iterator/">Iterator</a></li>
+                                        <li><a class="navigation__link" href="../mediator/">Mediator</a></li>
+                                        <li><a class="navigation__link navigation__link--active" href="../memento/">Memento</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
