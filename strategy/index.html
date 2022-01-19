@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=yes maximum-scale=2.2 minimum-scale=1.0">
-    <title>Návrhové vzory v JS - State</title>
+    <title>Návrhové vzory v JS - Strategy</title>
 
     <script src="../media/js/libraries/highlight.min.js"></script>
     <script>hljs.highlightAll();</script>
@@ -28,95 +28,115 @@
         <div class="article-page">
             <div class="article-page__content">
                 <div class="article-page__main-side">
-                    <h1 class="heading-primary u-mb-small">State</h1>
+                    <h1 class="heading-primary u-mb-small">Strategy</h1>
                     <hr class="horizontal-rule u-mb-small">
-                    <p class="paragraph u-mb-medium">V této části se podíváme na State. Jedná se o návrhový vzor, ve kterém je chování objektu určeno jeho stavem.</p>
-                    <h2 class="heading-secondary u-mb-tiny">Proč State použít</h2>
-                    <p class="paragraph u-mb-small">Vezměmě v úvahu obyčejný telefon. To co s ním děláme závisí na jeho stavu a stavu telefonní linky. Pokud telefon zvoní nebo chceme zavolat, tak jej musíme vzít. Abychom mohli telefonovat, tak musí být telefon vytažen z držáku. Pokud někomu voláme a je zrovna obsazený, tak položíme sluchátko. Telefon tedy může být v různých stavech a podle toho máme jiné možnosti co s ním můžeme dělat. Návrhový vzor State se můžeme rozhodnout použít, když chceme aby nějaký objekt nabýval různých stavů.</p>
-                    <p class="paragraph u-mb-small">V JavaScriptu si můžeme vzít jako příklad Promise. Může nabývat tří stavů: PENDING, REJECTED nebo FULFILLED.</p>
-                    <p class="paragraph u-mb-medium">Konstrukce, která řídí stavy a přechody mezi nimi se nazývá State Machine. Je výrazně jiná než návrhový vzor State. Existují knihovny, které můžeme použít a nemusíme si ji vytvářet sami. Příklad její tvorby zde není ukázán.</p>
-                    <h2 class="heading-secondary u-mb-tiny">Příklad - Přepínač</h2>
-                    <p class="paragraph u-mb-small">Následující příklad ukazuje třídu Prepinac, reprezentující přepínač, který může nabývat dvou stavů. Může být vypnutý nebo zapnutý. Třída Prepinac obsahuje vlastnost state, která uchovává aktuální stav, ve kterém se přepínač právě nachází. Podle toho jestli je vypnutý nebo zapnutý, obsahuje tato vlastnost jiný typ State objektu.</p>
-                    <pre class="code-box u-mb-small"><code>// třída reprezentující přepínač
-class Prepinac {
-    constructor() {
-        // state objekt určující stav přepínače
-        this.state = new OffState();
-    }
+                    <p class="paragraph u-mb-medium">V této části se podíváme na návrhový vzor Strategy. Tento návrhový vzor rozděluje algoritmy na vyšší a nižší části.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Proč Strategy použít</h2>
+                    <p class="paragraph u-mb-small">Návrhový vzor Strategy se týká toho, že některé algoritmy můžeme rozdělit na vyšší a nižší části. Díky tomu můžeme oddělit funkčnost (vyšší část) od implementace (nižší část) a použít tak algoritmus na více věcí.</p>
+                    <p class="paragraph u-mb-tiny">Jako příklad rozdělení algoritmu na vyšší a nižší část si můžeme ukázat třeba přípravu čaje. Můžeme ji rozdělit na tuto vyšší a nižší část:</p>
+                    <ul class="unordered-list u-mb-medium">
+                        <li><b>vyšší část</b> - uvaříme vodu a nalijeme ji do sklenice (tento proces můžeme použít pro přípravu různých horkých nápojů, ne jen čaje)</li>
+                        <li><b>nižší část</b> - vložíme čajový sáček do sklenice (toto je specifický krok pro přípravu čaje)</li>
+                    </ul>
+                    <h2 class="heading-secondary u-mb-tiny">Příklad - Tvorba listu v různých formátech</h2>
+                    <p class="paragraph u-mb-small">Následující ukázka ukazuje třídu TextProcessor, která slouží k tvorbě listu v různých formátech. Můžeme si vybrat ze dvou formátů: markdown a html. Pro oba tyto formáty jsou v ukázce vytvořeny Strategy třídy, které se starají o nižší část algoritmu pro vytváření listu.</p>
+                    <pre class="code-box u-mb-medium"><code>const OutputFormat = Object.freeze({
+    markdown: 0,
+    html: 1
+});
 
-    // metoda pro zapnutí přepínače
-    on() {
-        // zavolání metody on state objektu
-        this.state.on(this);
-    }
+// základní třída pro List Strategy třídy
+class ListStrategy {
+    start(buffer) {}
+    konec(buffer) {}
+    pridejPolozku(buffer, polozka) {}
+}
 
-    // metoda pro vypnutí přepínače
-    off() {
-        // zavolání metody off state objektu
-        this.state.off(this);
+// Strategy pro Markdown List
+class MarkdownListStrategy extends ListStrategy {
+    // ne všechny metody musíme přepsat, pokud je
+    // nepotřebujeme, tak se budou volat prázdné metody
+
+    pridejPolozku(buffer, polozka) {
+        buffer.push(` * ${polozka}`);
     }
 }
 
-// základní třída pro State třídy
-class State {
-    constructor() {
-        if (this.constructor === State)
-            throw new Error('abstract!');
+// Strategy pro HTML List
+class HtmlListStrategy extends ListStrategy {
+    start(buffer) {
+        buffer.push('&lt;ul&gt;');
     }
 
-    // v základní třídě se v metodě on vypíše,
-    // že je přepínač již zapnutý
-    on(prepinac) {
-        console.log("Přepínač je již zapnutý.");
+    konec(buffer) {
+        buffer.push('&lt;/ul&gt;');
     }
 
-    // v základní třídě se v metodě off vypíše,
-    // že je přepínač již vypnutý
-    off(prepinac) {
-        console.log("Přepínač je již vypnutý.");
+    pridejPolozku(buffer, polozka) {
+        buffer.push(`  &lt;li&gt;${polozka}&lt;/li&gt;`);
     }
 }
 
-// State pro zapnutý stav přepínače
-class OnState extends State {
-    constructor() {
-        super();
-        // při vytvoření OnStatu se vypíše, že je přepínač zapnutý
-        console.log("Přepínač je zapnutý.");
+class TextProcessor {
+    constructor(outputFormat) {
+        this.buffer = [];
+        this.nastavOutputFormat(outputFormat);
     }
 
-    // metoda off vypne přepínač - nastaví mu vlastnost
-    // state na nový OffState
-    off(prepinac) {
-        console.log("Přepínač se vypíná...");
-        prepinac.state = new OffState();
+    // pomocí této metody můžeme změnit Strategy
+    nastavOutputFormat(format) {
+        switch (format) {
+            case OutputFormat.markdown:
+                this.listStrategy = new MarkdownListStrategy();
+                break;
+            case OutputFormat.html:
+                this.listStrategy = new HtmlListStrategy();
+                break;
+        }
+    }
+
+    // metoda pro připojení předaného listu položek
+    pripojList(polozky) {
+        // v algoritmu se používá nastavená Strategy
+        this.listStrategy.start(this.buffer);
+        for (let polozka of polozky)
+            this.listStrategy.pridejPolozku(this.buffer, polozka);
+        this.listStrategy.konec(this.buffer);
+    }
+
+    smaz() {
+        this.buffer = [];
+    }
+
+    toString() {
+        return this.buffer.join('\n');
     }
 }
 
-// State pro vypnutý stav přepínače
-class OffState extends State {
-    constructor() {
-        super();
-        // při vytvoření OffStatu se vypíše, že je přepínač vypnutý
-        console.log("Přepínač je vypnutý.");
-    }
 
-    // metoda on zapne přepínač - nastaví mu vlastnost
-    // state na nový OnState
-    on(prepinac) {
-        console.log("Přepínač se zapíná...");
-        prepinac.state = new OnState();
-    }
-}
+const tp = new TextProcessor(OutputFormat.markdown);
+tp.pripojList(['creational', 'structural', 'behavioral']);
+console.log(tp.toString());
+// vypíše:
+// * creational
+// * structural
+// * behavioral
 
+tp.smaz();
 
-const prepinac = new Prepinac();
-prepinac.on();
-prepinac.off();
-prepinac.off();</code></pre>
-                    <p class="paragraph u-mb-medium">Předchozí příklad ukazuje vytvoření přepínače pomocí návrhového vzoru State. Určitě není dobré k tak jednoduché věci State použít, ale dobře to ilustruje, jak tento návrhový vzor vlastně funguje.</p>
+// nastavení jiné Strategy
+tp.nastavOutputFormat(OutputFormat.html);
+tp.pripojList(['Návrhové', 'Vzory', 'V', 'JS']);
+console.log(tp.toString());
+// vypíše:
+// &lt;ul&gt;
+//   &lt;li&gt;Návrhové&lt;/li&gt;
+//   &lt;li&gt;Vzory&lt;/li&gt;
+//   &lt;li&gt;V&lt;/li&gt;
+//   &lt;li&gt;JS&lt;/li&gt;
+// &lt;/ul&gt;</code></pre>
                     <div class="u-text-center">
-                        <a href="../strategy/" class="button-primary">pokračovat na další část</a>
+                        <a href="#" class="button-primary">pokračovat na další část</a>
                     </div>
                 </div>
                 <div class="article-page__lateral-side">
@@ -156,8 +176,8 @@ prepinac.off();</code></pre>
                                         <li><a class="navigation__link" href="../mediator/">Mediator</a></li>
                                         <li><a class="navigation__link" href="../memento/">Memento</a></li>
                                         <li><a class="navigation__link" href="../observer/">Observer</a></li>
-                                        <li><a class="navigation__link navigation__link--active" href="../state/">State</a></li>
-                                        <li><a class="navigation__link" href="../strategy/">Strategy</a></li>
+                                        <li><a class="navigation__link" href="../state/">State</a></li>
+                                        <li><a class="navigation__link navigation__link--active" href="../strategy/">Strategy</a></li>
                                     </ul>
                                 </li>
                             </ul>
