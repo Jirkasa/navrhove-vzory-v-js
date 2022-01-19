@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=yes maximum-scale=2.2 minimum-scale=1.0">
+    <title>Návrhové vzory v JS - Observer</title>
+
+    <script src="../media/js/libraries/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+
+    <link rel="stylesheet" href="../media/css/style.css">
+</head>
+<body>
+    <div class="page">
+        <header class="header">
+            <div class="header__content">
+                <h2 class="header__title"><span>Návrhové vzory</span> v JS</h2>
+                <nav class="header__nav">
+                    <ul>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+        <div class="article-page">
+            <div class="article-page__content">
+                <div class="article-page__main-side">
+                    <h1 class="heading-primary u-mb-small">Observer</h1>
+                    <hr class="horizontal-rule u-mb-small">
+                    <p class="paragraph u-mb-medium">V této části si ukážeme návrhový vzor Observer. Jedná se o objekt, který si přeje být informován o provedených událostech v systému.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Proč Observer použít</h2>
+                    <p class="paragraph u-mb-small">U některých objektů chceme, aby byli informováni když se v našem systému něco stane. Například když se změní vlastnost nějakého objektu a tak dále, prostě cokoliv.</p>
+                    <p class="paragraph u-mb-medium">Objekt, který naslouchá událostem je Observer, a entita, která události generuje je Observable.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Příklad - Vytvoření události a reagování na ni</h2>
+                    <p class="paragraph u-mb-small">Následující ukázka ukazuje třídu Clovek, která spouští událost onemocnet. K této události můžeme nastavit funkce, které proběhnou po jejím spuštění. Událost je objekt třídy Event, která obsahuje metody subscribe, unsubscribe a fire. Metoda subscribe slouží pro přihlášení k odběru události, metoda unsubscribe k odhlášení odběru události a pomocí metody fire se událost spouští.</p>
+                    <pre class="code-box u-mb-medium"><code>// Tato třída představuje událost (event)
+class Event {
+    constructor() {
+        // v této mapě se ukládají funkce, které
+        // se mají po spuštění eventu zavolat
+        this.handlers = new Map();
+        this.count = 0;
+    }
+
+    // tato metoda slouží pro přidání funkce,
+    // která se zavolá po spuštění události
+    subscribe(handler) {
+        // přidání funkce do mapy handlers
+        this.handlers.set(this.count, handler);
+        // vrací se token (klíč pod kterým se funkce nachází v mapě handlers)
+        // - tento token se později může použít k odstranění funkce
+        return this.count++;
+    }
+
+    // metoda k odstranění funkce z mapy handlers podle předaného tokenu
+    unsubscribe(idx) {
+        // aby se nemuseli posouvat indexy, tak používáme mapu a je to rychlejší
+        this.handlers.delete(idx);
+    }
+
+    // zavolání této metody spustí event
+    // - sender = objekt, který event spustil
+    // - args = argumenty (objekt s informacemi)
+    fire(sender, args) {
+        // všechny funkce v mapě handlers se zavolají
+        this.handlers.forEach(v => v(sender, args));
+    }
+}
+
+// argumenty pro metodu fire třídy Event
+class OnemocnetArgs {
+    constructor(adresa) {
+        this.adresa = adresa;
+    }
+}
+
+class Clovek {
+    constructor(adresa) {
+        this.adresa = adresa;
+        // událost pro onemocnění člověka
+        this.onemocnet = new Event();
+    }
+
+    nachladitSe() {
+        // spuštění události (eventu)
+        this.onemocnet.fire(this, new OnemocnetArgs(this.adresa));
+    }
+}
+
+
+const clovek = new Clovek('135 Praha');
+
+// přihlášení k odběru události když člověk chytí nemoc
+const token = clovek.onemocnet.subscribe((odesilatel, args) => {
+    console.log(`Doktor byl přivolán na adresu: ${args.adresa}`);
+});
+
+clovek.nachladitSe();
+clovek.nachladitSe();
+
+// odhlášení odběru událostí pomocí získaného tokenu
+clovek.onemocnet.unsubscribe(token);
+
+clovek.nachladitSe();</code></pre>
+                    <h2 class="heading-secondary u-mb-tiny">Příklad - Pozorování změny vlastnosti objektu</h2>
+                    <p class="paragraph u-mb-small">Následující ukázka ukazuje, jak můžeme pozorovat změnu vlastnosti nějakého objektu, aniž by nás o tom sledovaný objekt přímo informoval. V ukázce je použita třída Event, která byla okomentována v minulém příkladu.</p>
+                    <pre class="code-box u-mb-medium"><code>class Event {
+    constructor() {
+        this.handlers = new Map();
+        this.count = 0;
+    }
+
+    subscribe(handler) {
+        this.handlers.set(this.count, handler);
+        return this.count++;
+    }
+
+    unsubscribe(idx) {
+        this.handlers.delete(idx);
+    }
+
+    fire(sender, args) {
+        this.handlers.forEach(v => v(sender, args));
+    }
+}
+
+// argumenty pro metodu fire třídy Event
+class ZmenaVlastnostiArgs {
+    constructor(nazev, novaHodnota) {
+        this.nazev = nazev;
+        this.novaHodnota = novaHodnota;
+    }
+}
+
+class Clovek {
+    constructor(vek) {
+        this._vek = vek;
+        // událost pro změny vlastnosti vek
+        this.zmenaVlastnosti = new Event();
+    }
+
+    get vek() { return this._vek; }
+
+    set vek(hodnota) {
+        if (!hodnota || hodnota === this._vek) return;
+        this._vek = hodnota;
+        // spuštění události pro změnu vlastnosti vek
+        this.zmenaVlastnosti.fire(this, new ZmenaVlastnostiArgs("vek", hodnota));
+    }
+}
+
+class KontrolaRegistrace {
+    constructor(clovek) {
+        this.clovek = clovek;
+        // přihlášení k odběru události při změně vlastnosti objektu clovek
+        // - protože metodu předáváme k pozdějšímu zavolání, tak metodou bind
+        // - určujeme, čemu se bude rovnat klíčové slovo this až se bude metoda volat
+        this.token = clovek.zmenaVlastnosti.subscribe(this.vekZmenen.bind(this));
+    }
+
+    // tato metoda se zavolá při změně věku člověka
+    vekZmenen(odesilatel, args) {
+        // pokud událost spustil objekt this.clovek a změnila
+        // se vlastnost vek, tak proběhne tento kód
+        if (odesilatel === this.clovek && args.nazev === "vek") {
+            if (args.novaHodnota &lt; 13) {
+                console.log("Ještě se nemůžeš zaregistrovat, jsi moc mladý.");
+            } else {
+                console.log("Dosáhl jsi požadovaného věku k registraci. Můžeš se zaregistrovat.");
+                // odhlášení odběru události při změně vlastnosti
+                this.clovek.zmenaVlastnosti.unsubscribe(this.token);
+            }
+        }
+    }
+}
+
+
+const clovek = new Clovek(11);
+const kontrolaRegistrace = new KontrolaRegistrace(clovek);
+
+// změnění věku člověka
+clovek.vek++;
+clovek.vek++;</code></pre>
+                    <div class="u-text-center">
+                        <a href="#" class="button-primary">pokračovat na další část</a>
+                    </div>
+                </div>
+                <div class="article-page__lateral-side">
+                    <div class="article-page__sticky-content">
+                        <nav class="navigation">
+                            <ul>
+                                <li class="navigation__group">
+                                    <ul>
+                                        <li><a class="navigation__link" href="../navrhove-principy/">Návrhové principy</a></li>
+                                    </ul>
+                                </li>
+                                <li class="navigation__group">Creational
+                                    <ul>
+                                        <li><a class="navigation__link" href="../builder/">Builder</a></li>
+                                        <li><a class="navigation__link" href="../factory/">Factory</a></li>
+                                        <li><a class="navigation__link" href="../prototype/">Prototype</a></li>
+                                        <li><a class="navigation__link" href="../singleton/">Singleton</a></li>
+                                    </ul>
+                                </li>
+                                <li class="navigation__group">Structural
+                                    <ul>
+                                        <li><a class="navigation__link" href="../adapter/">Adapter</a></li>
+                                        <li><a class="navigation__link" href="../bridge/">Bridge</a></li>
+                                        <li><a class="navigation__link" href="../composite/">Composite</a></li>
+                                        <li><a class="navigation__link" href="../decorator/">Decorator</a></li>
+                                        <li><a class="navigation__link" href="../facade/">Facade</a></li>
+                                        <li><a class="navigation__link" href="../flyweight/">Flyweight</a></li>
+                                        <li><a class="navigation__link" href="../proxy/">Proxy</a></li>
+                                    </ul>
+                                </li>
+                                <li class="navigation__group">Behavioral
+                                    <ul>
+                                        <li><a class="navigation__link" href="../chain-of-responsibility/">Chain of responsibility</a></li>
+                                        <li><a class="navigation__link" href="../command/">Command</a></li>
+                                        <li><a class="navigation__link" href="../interpreter/">Interpreter</a></li>
+                                        <li><a class="navigation__link" href="../iterator/">Iterator</a></li>
+                                        <li><a class="navigation__link" href="../mediator/">Mediator</a></li>
+                                        <li><a class="navigation__link" href="../memento/">Memento</a></li>
+                                        <li><a class="navigation__link navigation__link--active" href="../observer/">Observer</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
