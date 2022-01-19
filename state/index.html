@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=yes maximum-scale=2.2 minimum-scale=1.0">
-    <title>Návrhové vzory v JS - Mediator</title>
+    <title>Návrhové vzory v JS - State</title>
 
     <script src="../media/js/libraries/highlight.min.js"></script>
     <script>hljs.highlightAll();</script>
@@ -28,116 +28,95 @@
         <div class="article-page">
             <div class="article-page__content">
                 <div class="article-page__main-side">
-                    <h1 class="heading-primary u-mb-small">Mediator</h1>
+                    <h1 class="heading-primary u-mb-small">State</h1>
                     <hr class="horizontal-rule u-mb-small">
-                    <p class="paragraph u-mb-medium">V této části se podíváme na Mediator. Tento návrhový vzor usnadňuje komunikaci mezi různými komponentami.</p>
-                    <h2 class="heading-secondary u-mb-tiny">Proč Mediator použít</h2>
-                    <p class="paragraph u-mb-medium">U některých komponent, které mezi sebou komunikují nedává smysl aby mezi sebou měli přímé reference. Například když mohou do našeho systému kdykoliv vstoupit nebo z něj vystoupit. Když si například představíme nějakou chatovací místnost, tak namísto toho abychom uživatele mezi sebou různě propojovali je jen napojíme na nějakou centrální komponentu, která mezi nimi zprostředkovává komunikaci.</p>
-                    <h2 class="heading-secondary u-mb-tiny">Příklad - Chatovací místnost</h2>
-                    <p class="paragraph u-mb-small">Následující ukázka ukazuje třídu ChatRoom a třídu Clovek. Třída ChatRoom představuje chatovací místnost a třída Clovek uživatele, kteří se k této místnosti mohou připojit a mohou mezi sebou komunikovat.</p>
-                    <pre class="code-box u-mb-medium"><code>class Clovek {
-    constructor(jmeno) {
-        this.jmeno = jmeno;
-        this.chatLog = [];
-    }
-
-    // tuto metodu může Mediator (chatovací místnost)
-    // použít k poslání zprávy uživateli
-    prijmi(odesilatel, zprava) {
-        const text = `${odesilatel}: ${zprava}`;
-        console.log(`[chat uživatele ${this.jmeno}] ${text}`);
-        this.chatLog.push(text);
-    }
-
-    posli(zprava) {
-        // poslání zprávy do chatovací místnosti
-        this.room.broadcast(this.jmeno, zprava);
-    }
-
-    posliPrivatniZpravu(cil, zprava) {
-        // poslání soukromé zprávy přes chatovací místnost
-        this.room.zprava(this.jmeno, cil, zprava);
-    }
-}
-
-// Mediator (chatovací místnost)
-// - zajišťuje komunikaci mezi objekty třídy Clovek
-class ChatRoom {
+                    <p class="paragraph u-mb-medium">V této části se podíváme na State. Jedná se o návrhový vzor, ve kterém je chování objektu určeno jeho stavem.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Proč State použít</h2>
+                    <p class="paragraph u-mb-small">Vezměmě v úvahu obyčejný telefon. To co s ním děláme závisí na jeho stavu a stavu telefonní linky. Pokud telefon zvoní nebo chceme zavolat, tak jej musíme vzít. Abychom mohli telefonovat, tak musí být telefon vytažen z držáku. Pokud někomu voláme a je zrovna obsazený, tak položíme sluchátko. Telefon tedy může být v různých stavech a podle toho máme jiné možnosti co s ním můžeme dělat. Návrhový vzor State se můžeme rozhodnout použít, když chceme aby nějaký objekt nabýval různých stavů.</p>
+                    <p class="paragraph u-mb-small">V JavaScriptu si můžeme vzít jako příklad Promise. Může nabývat tří stavů: PENDING, REJECTED nebo FULFILLED.</p>
+                    <p class="paragraph u-mb-medium">Konstrukce, která řídí stavy a přechody mezi nimi se nazývá State Machine. Je výrazně jiná než návrhový vzor State. Existují knihovny, které můžeme použít a nemusíme si ji vytvářet sami. Příklad její tvorby zde není ukázán.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Příklad - Přepínač</h2>
+                    <p class="paragraph u-mb-small">Následující příklad ukazuje třídu Prepinac, reprezentující přepínač, který může nabývat dvou stavů. Může být vypnutý nebo zapnutý. Třída Prepinac obsahuje vlastnost state, která uchovává aktuální stav, ve kterém se přepínač právě nachází. Podle toho jestli je vypnutý nebo zapnutý, obsahuje tato vlastnost jiný typ State objektu.</p>
+                    <pre class="code-box u-mb-small"><code>// třída reprezentující přepínač
+class Prepinac {
     constructor() {
-        // v tomto poli jsou uloženi lidé, kteří
-        // jsou k chatovací místnosti připojeni
-        this.lide = [];
+        // state objekt určující stav přepínače
+        this.state = new OffState();
     }
 
-    // tuto metodu mohou uživatelé použít k poslání
-    // zprávy všem uživatelům v místnosti
-    broadcast(zdroj, zprava) {
-        for (let uzivatel of this.lide) {
-            if (uzivatel.jmeno !== zdroj)
-                uzivatel.prijmi(zdroj, zprava);
-        }
+    // metoda pro zapnutí přepínače
+    on() {
+        // zavolání metody on state objektu
+        this.state.on(this);
     }
 
-    // pomocí této metody se může uživatel
-    // připojit k místnosti
-    pripojit(uzivatel) {
-        let zprava = `${uzivatel.jmeno} se připojil`;
-        this.broadcast("room", zprava);
+    // metoda pro vypnutí přepínače
+    off() {
+        // zavolání metody off state objektu
+        this.state.off(this);
+    }
+}
 
-        uzivatel.room = this;
-        this.lide.push(uzivatel);
+// základní třída pro State třídy
+class State {
+    constructor() {
+        if (this.constructor === State)
+            throw new Error('abstract!');
     }
 
-    // tuto metodu mohou uživatelé použít k poslání
-    // soukromé zprávy nějakému uživateli
-    zprava(zdroj, cil, zprava) {
-        for (let uzivatel of this.lide) {
-            if (uzivatel.jmeno === cil) {
-                uzivatel.prijmi(zdroj, zprava);
-                break;
-            }
-        }
+    // v základní třídě se v metodě on vypíše,
+    // že je přepínač již zapnutý
+    on(prepinac) {
+        console.log("Přepínač je již zapnutý.");
+    }
+
+    // v základní třídě se v metodě off vypíše,
+    // že je přepínač již vypnutý
+    off(prepinac) {
+        console.log("Přepínač je již vypnutý.");
+    }
+}
+
+// State pro zapnutý stav přepínače
+class OnState extends State {
+    constructor() {
+        super();
+        // při vytvoření OnStatu se vypíše, že je přepínač zapnutý
+        console.log("Přepínač je zapnutý.");
+    }
+
+    // metoda off vypne přepínač - nastaví mu vlastnost
+    // state na nový OffState
+    off(prepinac) {
+        console.log("Přepínač se vypíná...");
+        prepinac.state = new OffState();
+    }
+}
+
+// State pro vypnutý stav přepínače
+class OffState extends State {
+    constructor() {
+        super();
+        // při vytvoření OffStatu se vypíše, že je přepínač vypnutý
+        console.log("Přepínač je vypnutý.");
+    }
+
+    // metoda on zapne přepínač - nastaví mu vlastnost
+    // state na nový OnState
+    on(prepinac) {
+        console.log("Přepínač se zapíná...");
+        prepinac.state = new OnState();
     }
 }
 
 
-// vytvoření Mediatoru (chatovací místnosti)
-const room = new ChatRoom();
-
-const karel = new Clovek("Karel");
-const pavel = new Clovek("Pavel");
-
-// připojení lidí k chatovací místnosti
-room.pripojit(karel);
-room.pripojit(pavel);
-
-// lidé mohou použít chatovací místnost k posílání zpráv
-karel.posli("Zdravím");
-pavel.posli("Zdar Karle");
-
-const ivan = new Clovek("Ivan");
-
-// připojení dalšího člověka do chatovací místnosti
-room.pripojit(ivan);
-
-// poslání zprávy
-ivan.posli("Čau všichni");
-
-// poslání soukromé zprávy od Karla Ivanovi
-karel.posliPrivatniZpravu("Ivan", "Vítej Ivane");
-
-
-// výsledný výstup bude takový:
-// [chat uživatele Karel] room: Pavel se připojil
-// [chat uživatele Pavel] Karel: Zdravím
-// [chat uživatele Karel] Pavel: Zdar Karle
-// [chat uživatele Karel] room: Ivan se připojil
-// [chat uživatele Pavel] room: Ivan se připojil
-// [chat uživatele Karel] Ivan: Čau všichni
-// [chat uživatele Pavel] Ivan: Čau všichni
-// [chat uživatele Ivan] Karel: Vítej Ivane</code></pre>
+const prepinac = new Prepinac();
+prepinac.on();
+prepinac.off();
+prepinac.off();</code></pre>
+                    <p class="paragraph u-mb-medium">Předchozí příklad ukazuje vytvoření přepínače pomocí návrhového vzoru State. Určitě není dobré k tak jednoduché věci State použít, ale dobře to ilustruje, jak tento návrhový vzor vlastně funguje.</p>
                     <div class="u-text-center">
-                        <a href="../memento/" class="button-primary">pokračovat na další část</a>
+                        <a href="#" class="button-primary">pokračovat na další část</a>
                     </div>
                 </div>
                 <div class="article-page__lateral-side">
@@ -174,10 +153,10 @@ karel.posliPrivatniZpravu("Ivan", "Vítej Ivane");
                                         <li><a class="navigation__link" href="../command/">Command</a></li>
                                         <li><a class="navigation__link" href="../interpreter/">Interpreter</a></li>
                                         <li><a class="navigation__link" href="../iterator/">Iterator</a></li>
-                                        <li><a class="navigation__link navigation__link--active" href="../mediator/">Mediator</a></li>
+                                        <li><a class="navigation__link" href="../mediator/">Mediator</a></li>
                                         <li><a class="navigation__link" href="../memento/">Memento</a></li>
                                         <li><a class="navigation__link" href="../observer/">Observer</a></li>
-                                        <li><a class="navigation__link" href="../state/">State</a></li>
+                                        <li><a class="navigation__link navigation__link--active" href="../state/">State</a></li>
                                     </ul>
                                 </li>
                             </ul>
