@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=yes maximum-scale=2.2 minimum-scale=1.0">
-    <title>Návrhové vzory v JS - Facade</title>
+    <title>Návrhové vzory v JS - Template Method</title>
 
     <script src="../media/js/libraries/highlight.min.js"></script>
     <script>hljs.highlightAll();</script>
@@ -28,67 +28,76 @@
         <div class="article-page">
             <div class="article-page__content">
                 <div class="article-page__main-side">
-                    <h1 class="heading-primary u-mb-small">Facade</h1>
+                    <h1 class="heading-primary u-mb-small">Template Method</h1>
                     <hr class="horizontal-rule u-mb-small">
-                    <p class="paragraph u-mb-medium">Tato část je o návrhovém vzoru Facade (také psaného jako Façade). Tento návrhový vzor poskytuje jednoduché a snadno pochopitelné rozhraní přes velký a sofistikovaný blok kódu.</p>
-                    <h2 class="heading-secondary u-mb-tiny">Proč Facade použít</h2>
-                    <p class="paragraph u-mb-small">Návrhový vzor Facade si můžeme představit například na nějakém domu. Typický dům obsahuje různé systémy, například elektřinu a kanalizaci. Člověka, jako obyvatele domu vůbec nemusí zajímat jak elektřina nebo kanalizace funguje, jen tyto systémy používá. Pokud chce například rožnout světlo, tak jen stiskne přepínač a nezajímá ho jak elektřina funguje. Facade nám tedy poskytuje jednodušší a snadno pochopitelné rozhraní přes nějaký komplexnější systém.</p>
-                    <p class="paragraph u-mb-medium">Facade můžeme použít k vytvoření snadno použitelného rozhraní přes nějaký komplexní systém, který jsme vytvořili. Díky tomu tak například můžeme někomu jinému umožnit s naším systém jednoduše pracovat.</p>
-                    <h2 class="heading-secondary u-mb-tiny">Příklad - Vytvoření jednoduchého rozhraní</h2>
-                    <p class="paragraph u-mb-small">Následující ukázka ukazuje systém představující restauraci, ve které se dá zakoupit jídlo (v našem případě jen salát). Ukázka obsahuje třídu Restaurace, která představuje Facade a pomocí jejich metod můžeme restauraci jednoduše používat, aniž bychom věděli co se děje v zákulisí.</p>
-                    <pre class="code-box u-mb-medium"><code>// Tomuto kód nemusíte rozumět (stejně není logický, je tu jen pro ukázku)
-class Lednice {
-    constructor(veci=[]) {
-        this.veci = veci;
+                    <p class="paragraph u-mb-medium">V této části si ukážeme Template Method. Tento návrhový vzor nám umožňuje definovat kostru algoritmu, který můžeme implementovat v podtřídách.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Proč Template Method použít</h2>
+                    <p class="paragraph u-mb-medium">Algoritmy mohou být rozloženy na vyšší část (funkčnost) a nižší část (implementaci). To nám umožňuje algoritmus použít na více věcí najednou. U návrhové vzoru Strategy používá vyšší část algoritmu nějaké rozhraní. Konkrétní implementace implementuje nějaké rozhraní. Návrhový vzor Template Method funguje podobně, ale využívá dědičnosti. Třída implementující algoritmus definuje abstraktní metody, které algoritmus používá, a tyto metody mohou podtřídy přepsat a nadefinovat si tak vlastní části algoritmu.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Příklad - Implementace algoritmu v podtřídách</h2>
+                    <p class="paragraph u-mb-small">Následující ukázka ukazuje třídu Hra, která obsahuje metodu spust. Tato metoda používá metody, které jsou implementovány podtřídami. V ukázce je třída Sachy, která je podtřídou třídy Hra a implementuje metody, které metoda spust volá.</p>
+                    <pre class="code-box u-mb-medium"><code>class Hra {
+    constructor(pocetHracu) {
+        this.pocetHracu = pocetHracu;
+        this.aktualniHrac = 0;
     }
-    pridej(vec) {
-        this.veci.push(vec);
+
+    // Template Metoda
+    // - tuto metodu nepřepisujeme, jedná se o algoritmus, který
+    // - volá metody, které jsou přepisovány v podtřídách
+    spust() {
+        // na začátku hry se zavolá metoda start
+        this.start();
+        // metoda vzitTah se bude volat tak dlouho, dokud někdo nevyhraje
+        while (!this.maViteze) {
+            this.vzitTah();
+        }
+        // po skončení hry se vypíše vítězný hráč
+        console.log(`Hráč ${this.viteznyHrac} vyhrál.`);
     }
-    ziskej(vec) {
-        let idx = this.veci.findIndex(v => v === vec);
-        if (idx === -1) return undefined;
-        const ziskanaVec = this.veci.splice(idx, 1)[0];
-        return ziskanaVec;
-    }
+
+    // tyto metody přepisujeme v podtřídách
+    start() {}
+    get maViteze() {}
+    vzitTah() {}
+    get viteznyHrac() {}
 }
-class Kuchyne {
+
+// vytvoření hry Šachy
+// - přepisují se metody třídy Hra
+// - je to jen pro ukázku, nefunguje to jako šachy
+class Sachy extends Hra {
     constructor() {
-        this.lednice = new Lednice(["tatarka, mléko, kečup, rajčata", "paprika", "mrkev"]);
-        this.pripravenaJidla = [];
-    }
-    pripravSalat() {
-        this.lednice.ziskej("rajčata");
-        this.lednice.ziskej("paprika");
-        this.lednice.ziskej("mrkev");
-        this.pripravenaJidla.push("salat");
-    }
-    ziskejJidlo(jidlo) {
-        let idx = this.pripravenaJidla.findIndex(j => j === jidlo);
-        if (idx === -1) return undefined;
-        const ziskaneJidlo = this.pripravenaJidla.splice(idx, 1)[0];
-        return ziskaneJidlo;
-    }
-}
-// tato třída představuje Facade, která poskytuje snadno
-// použitelné rozhraní přes komplikovanější systém
-class Restaurace {
-    constructor() {
-        this.kuchyne = new Kuchyne();
+        super(2);
+        this.maxPocetTahu = 10;
+        this.tah = 1;
     }
 
-    // díky této metodě (popřípadě i dalším, pokud by jich bylo více) můžeme třídu
-    // Restaurace pohodlně používat, aniž bychom věděli co se děje v zákulisí
-    ziskejSalat() {
-        this.kuchyne.pripravSalat();
-        return this.kuchyne.ziskejJidlo("salat");
+    start() {
+        console.log(`Začíná hra šachy s ${this.pocetHracu} hráči.`);
+    }
+
+    get maViteze() {
+        return this.tah === this.maxPocetTahu;
+    }
+
+    vzitTah() {
+        console.log(`Tah ${this.tah++} byl zahrán hráčem ${this.aktualniHrac}`);
+        this.aktualniHrac = (this.aktualniHrac + 1) % this.pocetHracu;
+    }
+
+    get viteznyHrac() {
+        // vítězný hráč bude v našem případě aktuální
+        // hráč, což je samozřejmě nesmysl
+        return this.aktualniHrac;
     }
 }
 
 
-const restaurace = new Restaurace();
-let salat = restaurace.ziskejSalat();</code></pre>
+const sachy = new Sachy();
+// zavolání template metody
+sachy.spust();</code></pre>
                     <div class="u-text-center">
-                        <a href="../flyweight/" class="button-primary">pokračovat na další část</a>
+                        <a href="#" class="button-primary">pokračovat na další část</a>
                     </div>
                 </div>
                 <div class="article-page__lateral-side">
@@ -114,7 +123,7 @@ let salat = restaurace.ziskejSalat();</code></pre>
                                         <li><a class="navigation__link" href="../bridge/">Bridge</a></li>
                                         <li><a class="navigation__link" href="../composite/">Composite</a></li>
                                         <li><a class="navigation__link" href="../decorator/">Decorator</a></li>
-                                        <li><a class="navigation__link navigation__link--active" href="../facade/">Facade</a></li>
+                                        <li><a class="navigation__link" href="../facade/">Facade</a></li>
                                         <li><a class="navigation__link" href="../flyweight/">Flyweight</a></li>
                                         <li><a class="navigation__link" href="../proxy/">Proxy</a></li>
                                     </ul>
@@ -130,7 +139,7 @@ let salat = restaurace.ziskejSalat();</code></pre>
                                         <li><a class="navigation__link" href="../observer/">Observer</a></li>
                                         <li><a class="navigation__link" href="../state/">State</a></li>
                                         <li><a class="navigation__link" href="../strategy/">Strategy</a></li>
-                                        <li><a class="navigation__link" href="../template-method/">Template Method</a></li>
+                                        <li><a class="navigation__link navigation__link--active" href="../template-method/">Template Method</a></li>
                                     </ul>
                                 </li>
                             </ul>
