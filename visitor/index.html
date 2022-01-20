@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=yes maximum-scale=2.2 minimum-scale=1.0">
+    <title>Návrhové vzory v JS - Visitor</title>
+
+    <script src="../media/js/libraries/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+
+    <link rel="stylesheet" href="../media/css/style.css">
+</head>
+<body>
+    <div class="page">
+        <header class="header">
+            <div class="header__content">
+                <h2 class="header__title"><span>Návrhové vzory</span> v JS</h2>
+                <nav class="header__nav">
+                    <ul>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                        <li><a href="#" class="header__nav-link">something</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+        <div class="article-page">
+            <div class="article-page__content">
+                <div class="article-page__main-side">
+                    <h1 class="heading-primary u-mb-small">Visitor</h1>
+                    <hr class="horizontal-rule u-mb-small">
+                    <p class="paragraph u-mb-medium">V této části se podíváme na návrhový vzor Visitor. Díky Visitoru můžeme přidat kolekci objektů novou operaci bez jejich modifikace.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Proč Visitor použít</h2>
+                    <p class="paragraph u-mb-medium">Občas můžeme chtít provádět nějakou operaci například s celou objektovou strukturou, ale nechceme měnit třídy z kterých se skládá. Můžeme použít návrhový vzor Visitor, který slouží pro nevtíravé přidání nové funkcionality. Visitor je komponenta, která umí procházet datovou strukturu, skládající se z určitých (možná souvisejících) typů a pracuje s ní. Visitor v češtině znamená návštěvník, jedná se tedy o komponentu, která něco navštěvuje.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Příklad - Dotěrný Visitor</h2>
+                    <p class="paragraph u-mb-small">Jako první příklad si ukážeme méně vhodný způsob implementace Visitora. Neznamená to ale, že bychom něco takového nikdy neměli dělat, záleží na nás.</p>
+                    <p class="paragraph u-mb-small">Následující třída ukazuje třídy CiselnyVyraz a ScitaciVyraz, s jejichž pomocí můžeme sestavit nějaký matematický výraz (strukturu). Tyto třídy obsahují metodu print, která slouží k získání textové reprezentace výrazu. Metoda print bere jako parametr pole, které je Visitorem (navštěvuje objekt) a naplňuje jej různými řetězci.</p>
+                    <pre class="code-box u-mb-small"><code>class CiselnyVyraz {
+    constructor(hodnota) {
+        this.hodnota = hodnota;
+    }
+
+    // tato metoda bere jako parametr pole buffer
+    // - pole buffer je Visitor
+    print(buffer) {
+        buffer.push(this.hodnota.toString());
+    }
+}
+
+class ScitaciVyraz {
+    constructor(levaStrana, pravaStrana) {
+        this.levaStrana = levaStrana;
+        this.pravaStrana = pravaStrana;
+    }
+
+    // tato metoda bere jako parametr pole buffer
+    // - pole buffer je Visitor
+    print(buffer) {
+        buffer.push('(');
+        this.levaStrana.print(buffer);
+        buffer.push('+');
+        this.pravaStrana.print(buffer);
+        buffer.push(')');
+    }
+}
+
+
+// reprezentace matematického výrazu: 1+(2+3)
+const v = new ScitaciVyraz(
+    new CiselnyVyraz(1),
+    new ScitaciVyraz(
+        new CiselnyVyraz(2),
+        new CiselnyVyraz(3)
+    )
+);
+
+const buffer = [];
+// v tomto případě je pole buffer Visitor (navštěvuje
+// třídy ScitaciVyraz a CiselnyVyraz)
+v.print(buffer);
+console.log(buffer.join('')); // (1+(2+3))</code></pre>
+                    <p class="paragraph u-mb-medium">Problém této implementace je v tom, že jsme si pro Visitora museli ve třídách CiselnyVyraz a ScitaciVyraz vytvořit metodu print. Pokud nechceme tyto třídy vždy při přidávání nové operace modifikovat, tak to tímto způsobem udělat nemůžeme.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Příklad - Reflexní Visitor</h2>
+                    <p class="paragraph u-mb-small">V dalším příkladu si pro Visitora vytvoříme speciální komponentu. Ta bude obsahovat metodu print, kterou Visitor může použít. Takže ve třídách CiselnyVyraz a ScitaciVyraz metodu print nepotřebujeme a nemusíme je tedy modifikovat. To už je o něco lepší implementace než v předchozím příkladu, ale můžeme to udělat ještě lépe. Nejlepší způsob implementace Visitora je ukázán v posledním příkladu.</p>
+                    <p class="paragraph u-mb-small">Následující ukázka ukazuje třídu PrinterVyrazu, obsahující metodu print, která bere jako parametr matematický výraz a pole, do kterého se mají uložit řetězce. Třída PrinterVyrazu pracuje s objekty třídy CiselnyVyraz a ScitaciVyraz tak jak jsou a nemusíme je tedy pro Visitora modifikovat.</p>
+                    <pre class="code-box u-mb-medium"><code>class CiselnyVyraz {
+    constructor(hodnota) {
+        this.hodnota = hodnota;
+    }
+}
+
+class ScitaciVyraz {
+    constructor(levaStrana, pravaStrana) {
+        this.levaStrana = levaStrana;
+        this.pravaStrana = pravaStrana;
+    }
+}
+
+// komponenta umožňující Visitorovi provádět
+// operace se třídami CiselnyVyraz a ScitaciVyraz
+class PrinterVyrazu {
+    // tato metoda bere jako parametr výraz a pole buffer
+    // - pole buffer je Visitor
+    print(vyraz, buffer) {
+        if (vyraz instanceof CiselnyVyraz) {
+            buffer.push(vyraz.hodnota);
+        } else if (vyraz instanceof ScitaciVyraz) {
+            buffer.push('(');
+            this.print(vyraz.levaStrana, buffer);
+            buffer.push('+');
+            this.print(vyraz.pravaStrana, buffer);
+            buffer.push(')');
+        }
+    }
+}
+
+
+// reprezentace matematického výrazu: 1+(2+3)
+const v = new ScitaciVyraz(
+    new CiselnyVyraz(1),
+    new ScitaciVyraz(
+        new CiselnyVyraz(2),
+        new CiselnyVyraz(3)
+    )
+);
+
+// toto pole je Visitor
+const buffer = [];
+// tuto komponentu může Visitor (pole buffer) použít
+const printer = new PrinterVyrazu();
+printer.print(v, buffer);
+
+
+console.log(buffer.join('')); // (1+(2+3))</code></pre>
+                    <h2 class="heading-secondary u-mb-tiny">Příklad - Klasický Visitor</h2>
+                    <p class="paragraph u-mb-small">Na závěr si ukážeme pravděpodobně nejlepší způsob implementace Visitoru. Je pro něj potřeba modifikovat třídy CiselnyVyraz a ScitaciVyraz, ale jedná se jen o přidání jedné metody, kterou může Visitor zavolat, a být tak instancemi těchto tříd přijat.</p>
+                    <p class="paragraph u-mb-small">Následující ukázka třídám CiselnyVyraz a ScitaciVyraz přidává metodu prijmi. Tuto metoda může být zavolána Visitorem, který jí jako argument předá sám sebe. V metodě prijmi se zavolá metoda Visitora s argumentem this a Visitor může v této metodě s předaným objektem provést nějakou akci. Abych ukázal, že třídy CiselnyVyraz a ScitaciVyraz potřebují jen metodu prijmi, tak se v ukázce kromě Visitoru PrinterVyrazu nachází ještě Visitor KalkulatorVyrazu.</p>
+                    <pre class="code-box u-mb-medium"><code>class CiselnyVyraz {
+    constructor(hodnota) {
+        this.hodnota = hodnota;
+    }
+
+    // tato metoda je volána Visitorem
+    // - Visitor se předává jako parametr
+    prijmi(visitor) {
+        // zavolá se metoda navstivCislo předaného Visitoru s parametrem this
+        visitor.navstivCislo(this);
+    }
+}
+
+class ScitaciVyraz {
+    constructor(levaStrana, pravaStrana) {
+        this.levaStrana = levaStrana;
+        this.pravaStrana = pravaStrana;
+    }
+
+    // tato metoda je volána Visitorem
+    // - Visitor se předává jako parametr
+    prijmi(visitor) {
+        // zavolá se metoda navstivScitani předaného Visitoru s parametrem this
+        visitor.navstivScitani(this);
+    }
+}
+
+// Visitor
+// - slouží k vypsání matematického výrazu
+class PrinterVyrazu {
+    constructor() {
+        this.buffer = [];
+    }
+
+    navstivCislo(vyraz) {
+        this.buffer.push(vyraz.hodnota);
+    }
+
+    navstivScitani(vyraz) {
+        this.buffer.push('(');
+        // navštívení levé části výrazu
+        vyraz.levaStrana.prijmi(this);
+        this.buffer.push('+');
+        // navštívení pravé části výrazu
+        vyraz.pravaStrana.prijmi(this);
+        this.buffer.push(')');
+    }
+
+    toString() {
+        return this.buffer.join('');
+    }
+}
+
+// další Visitor
+// - slouží k vypočítání matematického výrazu
+class KalkulatorVyrazu {
+    constructor() {
+        this.vysledek = 0;
+    }
+
+    navstivCislo(vyraz) {
+        this.vysledek = vyraz.hodnota;
+    }
+
+    navstivScitani(vyraz) {
+        // navštívení levé části výrazu
+        vyraz.levaStrana.prijmi(this);
+        let temp = this.vysledek;
+        // navštívení pravé části výrazu
+        vyraz.pravaStrana.prijmi(this);
+        this.vysledek += temp;
+    }
+}
+
+
+// reprezentace matematického výrazu: 1+(2+3)
+const v = new ScitaciVyraz(
+    new CiselnyVyraz(1),
+    new ScitaciVyraz(
+        new CiselnyVyraz(2),
+        new CiselnyVyraz(3)
+    )
+);
+
+
+// použití Visitoru k získání textové reprezentace výrazu
+const printer = new PrinterVyrazu();
+printer.navstivScitani(v);
+
+// použití Visitoru k získání výsledku výrazu
+const kalkulator = new KalkulatorVyrazu();
+kalkulator.navstivScitani(v);
+
+
+console.log(`${printer.toString()} = ${kalkulator.vysledek}`); // (1+(2+3)) = 6</code></pre>
+                    <div class="u-text-center">
+                        <a href="#" class="button-primary">pokračovat na další část</a>
+                    </div>
+                </div>
+                <div class="article-page__lateral-side">
+                    <div class="article-page__sticky-content">
+                        <nav class="navigation">
+                            <ul>
+                                <li class="navigation__group">
+                                    <ul>
+                                        <li><a class="navigation__link" href="../navrhove-principy/">Návrhové principy</a></li>
+                                    </ul>
+                                </li>
+                                <li class="navigation__group">Creational
+                                    <ul>
+                                        <li><a class="navigation__link" href="../builder/">Builder</a></li>
+                                        <li><a class="navigation__link" href="../factory/">Factory</a></li>
+                                        <li><a class="navigation__link" href="../prototype/">Prototype</a></li>
+                                        <li><a class="navigation__link" href="../singleton/">Singleton</a></li>
+                                    </ul>
+                                </li>
+                                <li class="navigation__group">Structural
+                                    <ul>
+                                        <li><a class="navigation__link" href="../adapter/">Adapter</a></li>
+                                        <li><a class="navigation__link" href="../bridge/">Bridge</a></li>
+                                        <li><a class="navigation__link" href="../composite/">Composite</a></li>
+                                        <li><a class="navigation__link" href="../decorator/">Decorator</a></li>
+                                        <li><a class="navigation__link" href="../facade/">Facade</a></li>
+                                        <li><a class="navigation__link" href="../flyweight/">Flyweight</a></li>
+                                        <li><a class="navigation__link" href="../proxy/">Proxy</a></li>
+                                    </ul>
+                                </li>
+                                <li class="navigation__group">Behavioral
+                                    <ul>
+                                        <li><a class="navigation__link" href="../chain-of-responsibility/">Chain of responsibility</a></li>
+                                        <li><a class="navigation__link" href="../command/">Command</a></li>
+                                        <li><a class="navigation__link" href="../interpreter/">Interpreter</a></li>
+                                        <li><a class="navigation__link" href="../iterator/">Iterator</a></li>
+                                        <li><a class="navigation__link" href="../mediator/">Mediator</a></li>
+                                        <li><a class="navigation__link" href="../memento/">Memento</a></li>
+                                        <li><a class="navigation__link" href="../observer/">Observer</a></li>
+                                        <li><a class="navigation__link" href="../state/">State</a></li>
+                                        <li><a class="navigation__link" href="../strategy/">Strategy</a></li>
+                                        <li><a class="navigation__link" href="../template-method/">Template Method</a></li>
+                                        <li><a class="navigation__link navigation__link--active" href="../visitor/">Visitor</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
