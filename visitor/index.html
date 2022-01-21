@@ -136,7 +136,7 @@ console.log(buffer.join('')); // (1+(2+3))</code></pre>
                     <h2 class="heading-secondary u-mb-tiny">Příklad - Klasický Visitor</h2>
                     <p class="paragraph u-mb-small">Na závěr si ukážeme pravděpodobně nejlepší způsob implementace Visitoru. Je pro něj potřeba modifikovat třídy CiselnyVyraz a ScitaciVyraz, ale jedná se jen o přidání jedné metody, kterou může Visitor zavolat, a být tak instancemi těchto tříd přijat.</p>
                     <p class="paragraph u-mb-small">Následující ukázka třídám CiselnyVyraz a ScitaciVyraz přidává metodu prijmi. Tuto metoda může být zavolána Visitorem, který jí jako argument předá sám sebe. V metodě prijmi se zavolá metoda Visitora s argumentem this a Visitor může v této metodě s předaným objektem provést nějakou akci. Abych ukázal, že třídy CiselnyVyraz a ScitaciVyraz potřebují jen metodu prijmi, tak se v ukázce kromě Visitoru PrinterVyrazu nachází ještě Visitor KalkulatorVyrazu.</p>
-                    <pre class="code-box u-mb-medium"><code>class CiselnyVyraz {
+                    <pre class="code-box"><code>class CiselnyVyraz {
     constructor(hodnota) {
         this.hodnota = hodnota;
     }
@@ -231,9 +231,6 @@ kalkulator.navstivScitani(v);
 
 
 console.log(`${printer.toString()} = ${kalkulator.vysledek}`); // (1+(2+3)) = 6</code></pre>
-                    <div class="u-text-center">
-                        <a href="#" class="button-primary">pokračovat na další část</a>
-                    </div>
                 </div>
                 <div class="article-page__lateral-side">
                     <div class="article-page__sticky-content">
