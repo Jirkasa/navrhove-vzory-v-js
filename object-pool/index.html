@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=yes maximum-scale=2.2 minimum-scale=1.0">
-    <title>Návrhové vzory v JS - Facade</title>
+    <title>Návrhové vzory v JS - Object Pool</title>
 
     <script src="../media/js/libraries/highlight.min.js"></script>
     <script>hljs.highlightAll();</script>
@@ -28,67 +28,92 @@
         <div class="article-page">
             <div class="article-page__content">
                 <div class="article-page__main-side">
-                    <h1 class="heading-primary u-mb-small">Facade</h1>
+                    <h1 class="heading-primary u-mb-small">Object Pool</h1>
                     <hr class="horizontal-rule u-mb-small">
-                    <p class="paragraph u-mb-medium">Tato část je o návrhovém vzoru Facade (také psaného jako Façade). Tento návrhový vzor poskytuje jednoduché a snadno pochopitelné rozhraní přes velký a sofistikovaný blok kódu.</p>
-                    <h2 class="heading-secondary u-mb-tiny">Proč Facade použít</h2>
-                    <p class="paragraph u-mb-small">Návrhový vzor Facade si můžeme představit například na nějakém domu. Typický dům obsahuje různé systémy, například elektřinu a kanalizaci. Člověka, jako obyvatele domu vůbec nemusí zajímat jak elektřina nebo kanalizace funguje, jen tyto systémy používá. Pokud chce například rožnout světlo, tak jen stiskne přepínač a nezajímá ho jak elektřina funguje. Facade nám tedy poskytuje jednodušší a snadno pochopitelné rozhraní přes nějaký komplexnější systém.</p>
-                    <p class="paragraph u-mb-medium">Facade můžeme použít k vytvoření snadno použitelného rozhraní přes nějaký komplexní systém, který jsme vytvořili. Díky tomu tak například můžeme někomu jinému umožnit s naším systém jednoduše pracovat.</p>
-                    <h2 class="heading-secondary u-mb-tiny">Příklad - Vytvoření jednoduchého rozhraní</h2>
-                    <p class="paragraph u-mb-small">Následující ukázka ukazuje systém představující restauraci, ve které se dá zakoupit jídlo (v našem případě jen salát). Ukázka obsahuje třídu Restaurace, která představuje Facade a pomocí jejich metod můžeme restauraci jednoduše používat, aniž bychom věděli co se děje v zákulisí.</p>
-                    <pre class="code-box u-mb-medium"><code>// Tomuto kód nemusíte rozumět (stejně není logický, je tu jen pro ukázku)
-class Lednice {
-    constructor(veci=[]) {
-        this.veci = veci;
+                    <p class="paragraph u-mb-medium">V této části se podíváme na Object Pool. Tento návrhový vzor slouží k uchovávání použitých objektů, abychom je v budoucnu mohli znovu použít a nemuseli vytvářet nové instance. Object Pool nepatří mezi Gang of Four návrhové vzory, ale rozhodně jsem jej na těchto webových stránkách chtěl mít. Používal jsem jej totiž ještě předtím, než jsem se návrhové vzory začal učit a můžu říct, že dokáže být hodně užitečný.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Proč Object Pool použít</h2>
+                    <p class="paragraph u-mb-small">Návrhový vzor Object Pool můžeme použít, když opakovaně vytváříme instance nějaké třídy a tyto instance jsou v našem programu jen určitou dobu. Tvorba objektu může být náročná a může nám zpomalovat program. Proto si můžeme použité objekty někde ukládat, a když budeme potřebovat nový objekt, tak si namísto vytváření nové instance jen vezmeme objekt, který jsme již v minulosti použili.</p>
+                    <p class="paragraph u-mb-medium">Object Pool slouží k vytváření a uchovávání instancí nějaké třídy. Když potřebujeme novou instanci, tak řekneme Object Poolu aby nám ji dal, a když už ji nebudeme potřebovat, tak ji Object Poolu vrátíme. Object Pool nám dává buď nové instance, když zrovna nemá žádné k dispozici, nebo inicializuje již použité.</p>
+                    <h2 class="heading-secondary u-mb-tiny">Příklad - Znovupoužití objektů namísto vytváření nových</h2>
+                    <p class="paragraph u-mb-small">Následující ukázka Object Pool ukazuje, představuje jej třída ObjectPool. Při vytváření Object Poolu si určujeme, jaké instance třídy bude Object Pool uchovávat. V našem příkladu si vytváříme Object Pool pro objekty třídy Strela. Object Pool obsahuje metody ziskat a vratit. Metodu ziskat můžeme použít k získání objektu a metodu vratit můžeme použít k vrácení objektu, když už jej nepotřebujeme.</p>
+                    <pre class="code-box u-mb-medium"><code>class ObjectPool {
+    constructor(konstruktor) {
+        // uložení konstruktoru pro vytvoření nového objektu
+        this._konstruktor = konstruktor;
+        // v tomto poli se budou uchovávat použité objekty
+        this._objekty = [];
     }
-    pridej(vec) {
-        this.veci.push(vec);
+
+    // metoda k získání objektu z Object Poolu
+    ziskat() {
+        // pokud Object Pool neobsahuje žádné použité objekty, tak se vytvoří nový objekt
+        if (this._objekty.length === 0) return new this._konstruktor();
+
+        // získání objektu z pole obsahující použité objekty
+        const objekt = this._objekty.pop();
+        // inicializace objektu
+        objekt.init();
+        return objekt;
     }
-    ziskej(vec) {
-        let idx = this.veci.findIndex(v => v === vec);
-        if (idx === -1) return undefined;
-        const ziskanaVec = this.veci.splice(idx, 1)[0];
-        return ziskanaVec;
+
+    // metoda pro vrácení použitého objektu zpět do Object Poolu
+    vratit(objekt) {
+        // zresetování objektu
+        objekt.reset();
+        // uchování objektu pro znovupoužití
+        this._objekty.push(objekt);
     }
 }
-class Kuchyne {
+
+class Strela {
     constructor() {
-        this.lednice = new Lednice(["tatarka, mléko, kečup, rajčata", "paprika", "mrkev"]);
-        this.pripravenaJidla = [];
+        this.init();
+        this.pouzita = false;
     }
-    pripravSalat() {
-        this.lednice.ziskej("rajčata");
-        this.lednice.ziskej("paprika");
-        this.lednice.ziskej("mrkev");
-        this.pripravenaJidla.push("salat");
+
+    // tato metoda je volána Object Poolem
+    // pro inicializaci použitého objektu
+    init() {
+        this.x = 0;
+        this.x = 0;
     }
-    ziskejJidlo(jidlo) {
-        let idx = this.pripravenaJidla.findIndex(j => j === jidlo);
-        if (idx === -1) return undefined;
-        const ziskaneJidlo = this.pripravenaJidla.splice(idx, 1)[0];
-        return ziskaneJidlo;
+
+    // tato metoda je volána Object Poolem
+    // při vrácení použitého objektu
+    reset() {
+        // toto by se dalo dělat i v init metodě, metoda reset slouží hlavně
+        // k tomu, aby se třeba vyprázdnilo nějaké pole, které objekt obsahuje
+        // a uvolnila se tak paměť již při vrácení objektu do Object Poolu
+        this.pouzita = false;
+    }
+
+    pouzit(x, y) {
+        if (this.pouzita) return;
+
+        console.log("něco se provede...")
+        this.x = x;
+        this.y = y;
+
+        this.pouzita = true;
     }
 }
-// tato třída představuje Facade, která poskytuje snadno
-// použitelné rozhraní přes komplikovanější systém
-class Restaurace {
-    constructor() {
-        this.kuchyne = new Kuchyne();
-    }
-
-    // díky této metodě (popřípadě i dalším, pokud by jich bylo více) můžeme třídu
-    // Restaurace pohodlně používat, aniž bychom věděli co se děje v zákulisí
-    ziskejSalat() {
-        this.kuchyne.pripravSalat();
-        return this.kuchyne.ziskejJidlo("salat");
-    }
-}
 
 
-const restaurace = new Restaurace();
-let salat = restaurace.ziskejSalat();</code></pre>
+// vytvoření Object Poolu pro třídu Strela
+const objectPool = new ObjectPool(Strela);
+
+// získání objektu z Object Poolu
+const strela = objectPool.ziskat();
+strela.pouzit();
+
+// vrácení objektu do Object Poolu
+objectPool.vratit(strela);
+
+// získání objektu z Object Poolu
+const strela2 = objectPool.ziskat();
+strela2.pouzit();</code></pre>
                     <div class="u-text-center">
-                        <a href="../flyweight/" class="button-primary">pokračovat na další část</a>
+                        <a href="../prototype/" class="button-primary">pokračovat na další část</a>
                     </div>
                 </div>
                 <div class="article-page__lateral-side">
@@ -104,7 +129,7 @@ let salat = restaurace.ziskejSalat();</code></pre>
                                     <ul>
                                         <li><a class="navigation__link" href="../builder/">Builder</a></li>
                                         <li><a class="navigation__link" href="../factory/">Factory</a></li>
-                                        <li><a class="navigation__link" href="../object-pool/">Object Pool</a></li>
+                                        <li><a class="navigation__link navigation__link--active" href="../object-pool/">Object Pool</a></li>
                                         <li><a class="navigation__link" href="../prototype/">Prototype</a></li>
                                         <li><a class="navigation__link" href="../singleton/">Singleton</a></li>
                                     </ul>
@@ -115,7 +140,7 @@ let salat = restaurace.ziskejSalat();</code></pre>
                                         <li><a class="navigation__link" href="../bridge/">Bridge</a></li>
                                         <li><a class="navigation__link" href="../composite/">Composite</a></li>
                                         <li><a class="navigation__link" href="../decorator/">Decorator</a></li>
-                                        <li><a class="navigation__link navigation__link--active" href="../facade/">Facade</a></li>
+                                        <li><a class="navigation__link" href="../facade/">Facade</a></li>
                                         <li><a class="navigation__link" href="../flyweight/">Flyweight</a></li>
                                         <li><a class="navigation__link" href="../proxy/">Proxy</a></li>
                                     </ul>
