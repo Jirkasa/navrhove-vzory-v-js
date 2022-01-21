@@ -1,7 +1,18 @@
 .header {
-    background-color: @colors[secondary];
+    background-color: @colors[secondary-dark];
 
     padding: 2rem 3rem;
+
+    &--home-page {
+        background-color: transparent;
+        position: relative;
+        z-index: 10;
+        pointer-events: none;
+
+        a {
+            pointer-events: all;
+        }
+    }
 
     &__content {
         display: flex;
