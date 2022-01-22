@@ -28,24 +28,42 @@ body {
     color: @colors[dark-grey];
 }
 
+.section-heading {
+    font-size: 3rem;
+    font-weight: 600;
+
+    text-transform: uppercase;
+    color: @colors[dark-grey];
+
+    text-align: center;
+
+    &--light {
+        color: @colors[white];
+    }
+}
+
 .paragraph {
-    font-size: 1.6rem;
+    font-size: 1.7rem;
 
     line-height: 1.4;
 
     color: darken(@colors[grey], 10%);
 }
 
-a.anchor {
+.anchor {
     &:link, &:visited {
         color: @colors[primary];
 
         text-decoration: none;
     }
+
+    &:hover {
+        text-decoration: underline;
+    }
 }
 
 .unordered-list {
-    font-size: 1.6rem;
+    font-size: 1.7rem;
     list-style-position: inside;
 
     li {

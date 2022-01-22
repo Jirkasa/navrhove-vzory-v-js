@@ -24,15 +24,120 @@
             </header>
             <div class="welcome-section__content-part">
                 <div class="welcome-section__content">
-                    <h1 class="welcome-section__heading">Lorem ipsum dolor sit amet, consectetur adipisicing.</h1>
-                    <p class="welcome-section__text">Lorem ipsum dolor sit amet consectetur adipisicing elit. Veniam ducimus totam sunt nam fugiat, qui explicabo dolorem ipsam quibusdam nobis.</p>
-                    <a href="#" class="button-primary">dozvědět se více</a>
+                    <h1 class="welcome-section__heading">Naučte se psát přehledný a snadno rozšiřitelný kód</h1>
+                    <p class="welcome-section__text">Na těchto webových stránkách se dozvíte o různých návrhových vzorech. Jejich použitím budete moci vytvářet snadněji upravitelný a rozšiřitelný kód.</p>
+                    <a href="#uvod" class="button-primary">dozvědět se více</a>
                 </div>
             </div>
         </section>
+        <section id="uvod" class="introduction-section">
+            <div class="introduction-section__content">
+                <h2 class="section-heading">Vítejte na stránkách o návrhových vzorech v JS</h2>
+                <hr class="section-horizontal-rule">
+                <div class="introduction-section__text">
+                    <p class="u-mb-medium">Vítejte na webových stránkách o návrhových vzorech v JavaScriptu. Dozvíte se tu o různých návrhových vzorech, které můžete použít při psaní svého vlastního kódu. Nachází se zde tutoriál, ve kterém se na začátku dozvíte o různých návrhových principech, tedy o pravidlech, které nám pomáhají lépe navrhovat software, a v dalších jeho částech se můžete podívat na konkrétní návrhové vzory. Možná bych to spíš nazval jako přehled návrhových vzorů než tutoriál. V každé části vždy jen najdete k čemu konkrétní návrhový vzor slouží, proč jej použít a příklad použití, žádné velké množství textu nečekejte.</p>
+                    <p class="u-mb-medium">Tutoriál je rozdělen do 4 sekcí. První sekce se věnuje návrhovým principům a zbývající tři obsahují jednotlivé návrhové vzory. V tutoriálu jsou vysvětleny Gang of Four (GoF) návrhové vzory. GoF návrhové vzory jsou nejznámější skupinou návrhových vzorů, které byly popularizovány knihou napsanou v roce 1994 skupinou čtyř lidí: <a href="https://en.wikipedia.org/wiki/Erich_Gamma" target="_blank" class="anchor">Erich Gamma</a>, Richard Helm, <a href="https://en.wikipedia.org/wiki/Ralph_Johnson_(computer_scientist)" target="_blank" class="anchor">Ralph Johnson</a> a <a href="https://en.wikipedia.org/wiki/John_Vlissides" target="_blank" class="anchor">John Vlissides</a>. Dělí se do tří kategorií: vytvářející, strukturální a behaviorální. Pro každou tuto kategorii je v tutoriálu vyhrazena jedna sekce. Kromě GoF návrhových vzorů jsem se do tutoriálu rozhodl přidat ještě Object Pool, který jsem zařadil do vytvářejících návrhových vzorů. Používal jsem jej totiž ještě předtím, než jsem se o návrhových vzorech začal učit, a můžu říct, že dokáže být v některých případech hodně užitečný. Návrhové vzory jsou v jednotlivých sekcích tutoriálu seřazeny podle abecedy a v podstatě je jedno o kterém si chcete přečíst jako první. Určitě ale doporučuji si nejdříve přečíst část o návrhových principech.</p>
+                    <p>Tyto webové stránky jsem se rozhodl vytvořit proto, abych si předělal do čtivé podoby své poznámky, které jsem si dělal když jsem na udemy.com sledoval <a href="https://www.udemy.com/course/design-patterns-javascript/" target="_blank" class="anchor">kurz o návrhových vzorech v JavaScriptu</a>. Na konci kurzu jsem totiž skončil s textovým souborem a hromadou souborů s okomentovaným kódem. Chtěl jsem si to tedy nějakým způsobem sjednodit a vytvořit si přehled v podobě webových stránek. Kromě toho jsem si také chtěl zopakovat co jsem se v kurzu naučil.</p>
+                </div>
+                <div class="u-text-center">
+                    <a href="./navrhove-principy/" class="button-primary button-primary--smaller-padding">přejít na první část tutoriálu</a>
+                </div>
+            </div>
+        </section>
+        <section class="design-patterns-section">
+            <div class="design-patterns-section__content">
+                <h2 class="section-heading section-heading--light">Návrhové vzory</h2>
+                <hr class="section-horizontal-rule">
+                <p class="design-patterns-section__text">Návrhové vzory, které jsou na těchto webových stránkách vysvětleny, můžeme rozdělit do tří různých kategorií. V následujícím seznamu si je můžete prohlédnout.</p>
+                <div class="design-patterns-section__patterns">
+                    <div class="category-card">
+                        <div class="category-card__icon">
+                            <svg>
+                                <use xlink:href="./media/img/icon-sprite.svg#icon-hammer"></use>
+                            </svg>
+                        </div>
+                        <h3 class="category-card__name">Vytvářející</h3>
+                        <p class="category-card__description">Vzory týkající se tvorby objektů</p>
+                        <ul class="category-card__design-patterns">
+                            <li><a href="./builder/" class="category-card__pattern">Builder</a></li>
+                            <li><a href="./factory/" class="category-card__pattern">Factory</a></li>
+                            <li><a href="./object-pool/" class="category-card__pattern">Object Pool</a></li>
+                            <li><a href="./prototype/" class="category-card__pattern">Prototype</a></li>
+                            <li><a href="./singleton/" class="category-card__pattern">Singleton</a></li>
+                        </ul>
+                    </div>
+                    <div class="category-card">
+                        <div class="category-card__icon">
+                            <svg>
+                                <use xlink:href="./media/img/icon-sprite.svg#icon-power-cord"></use>
+                            </svg>
+                        </div>
+                        <h3 class="category-card__name">Strukturální</h3>
+                        <p class="category-card__description">Vzory týkající se struktury kódu</p>
+                        <ul class="category-card__design-patterns">
+                            <li><a href="./adapter/" class="category-card__pattern">Adapter</a></li>
+                            <li><a href="./bridge/" class="category-card__pattern">Bridge</a></li>
+                            <li><a href="./composite/" class="category-card__pattern">Composite</a></li>
+                            <li><a href="./decorator/" class="category-card__pattern">Decorator</a></li>
+                            <li><a href="./facade/" class="category-card__pattern">Facade</a></li>
+                            <li><a href="./flyweight/" class="category-card__pattern">Flyweight</a></li>
+                            <li><a href="./proxy/" class="category-card__pattern">Proxy</a></li>
+                        </ul>
+                    </div>
+                    <div class="category-card">
+                        <div class="category-card__icon">
+                            <svg>
+                                <use xlink:href="./media/img/icon-sprite.svg#icon-target"></use>
+                            </svg>
+                        </div>
+                        <h3 class="category-card__name">Behaviorální</h3>
+                        <p class="category-card__description">Vzory specializující se na jeden problém</p>
+                        <ul class="category-card__design-patterns">
+                            <li><a href="./chain-of-responsibility/" class="category-card__pattern">Chain of responsibility</a></li>
+                            <li><a href="./command/" class="category-card__pattern">Command</a></li>
+                            <li><a href="./interpreter/" class="category-card__pattern">Interpreter</a></li>
+                            <li><a href="./iterator/" class="category-card__pattern">Iterator</a></li>
+                            <li><a href="./mediator/" class="category-card__pattern">Mediator</a></li>
+                            <li><a href="./memento/" class="category-card__pattern">Memento</a></li>
+                            <li><a href="./observer/" class="category-card__pattern">Observer</a></li>
+                            <li><a href="./state/" class="category-card__pattern">State</a></li>
+                            <li><a href="./strategy/" class="category-card__pattern">Strategy</a></li>
+                            <li><a href="./template-method/" class="category-card__pattern">Template Method</a></li>
+                            <li><a href="./visitor/" class="category-card__pattern">Visitor</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="udemy-course">
+            <div class="udemy-course__content">
+                <h2 class="section-heading">Kde jsem se učil já</h2>
+                <hr class="section-horizontal-rule">
+                <div class="udemy-course__main-content">
+                    <div class="udemy-course__text-side">
+                        <p class="u-mb-medium">Já jsem se návrhové vzory učil ve video kurzu <a href="https://www.udemy.com/course/design-patterns-javascript/" target="_blank" class="anchor">Design Patterns in JavaScript</a> na udemy.com. Pokud se chcete návrhové vzory naučit, tak jej určitě můžu doporučit. Měli byste ale dobře znát JavaScript, protože instruktor nevysvětleju do detailu každou věc kterou dělá.</p>
+                        <p class="u-mb-medium">V mém tutoriálu nejsou návrhové vzory tak dobře vysvětlené jako v tomto kurzu. Pokud se kurz rozhodnete absolvovat, tak můžete můj tutoriál třeba pojmout jako poznámky, které si můžete občas přečíst, když si budete chtít něco připomenout.</p>
+                        <p>Také by vás možná mohlo zajímat, že autor kurzu Dmitri Nesteruk má více verzí tohoto kurzu pro různé programovací jazyky. Na všechny jeho video kurzy se můžete podívat <a href="https://www.udemy.com/user/dmitrinesteruk/" target="_blank" class="anchor">zde</a>.</p>
+                    </div>
+                    <div class="udemy-course__video-side">
+                        <a href="https://www.udemy.com/course/design-patterns-javascript/" target="_blank" class="udemy-course__video-link">
+                            <svg>
+                                <use xlink:href="./media/img/icon-sprite.svg#icon-film"></use>
+                            </svg>
+                            <img src="./media/img/course-video-background.webp" alt="Design Patterns in JavaScript Course">
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <footer class="footer">
+            Copyright &copy; by <span class="footer__author">Jiří Satora</span>
+        </footer>
     </div>
 
     <script src="./media/js/libraries/particles.min.js"></script>
-    <script src="./media/js/home.js"></script>
+    <script>
+        particlesJS.load('particles-js', 'media/assets/particlesjs-config.json');
+    </script>
 </body>
 </html>

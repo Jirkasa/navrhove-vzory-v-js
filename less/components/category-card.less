@@ -1,0 +1,84 @@
+.category-card {
+    flex: 1 0;
+
+    // border: .3rem solid @colors[grey];
+    background-color: @colors[white];
+
+    padding: 2rem;
+
+    &:not(:last-child) {
+        margin-right: 3rem;
+    }
+    
+    &__icon {
+        height: 10rem;
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: .2rem solid darken(@colors[white], 10%);
+
+        svg {
+            display: block;
+            height: 100%;
+            margin: 0 auto;
+
+            fill: @colors[primary];
+        }
+    }
+
+    &__name {
+        font-size: 2.5rem;
+        // font-weight: 600;
+
+        color: @colors[dark-grey];
+        text-transform: uppercase;
+        text-align: center;
+
+        margin-bottom: 1rem;
+    }
+
+    &__description {
+        font-size: 1.4rem;
+        line-height: 1.3;
+        font-weight: 600;
+
+        color: @colors[primary];
+        text-align: center;
+        text-transform: uppercase;
+
+        margin-bottom: 2rem;
+    }
+
+    &__design-patterns {
+        list-style: none;
+
+        padding: 0 4rem 4rem;
+
+        li:not(:last-child) {
+            margin-bottom: .7rem;
+        }
+    }
+
+    &__pattern {
+        &:link, &:visited {
+            display: block;
+            font-size: 1.7rem;
+
+            text-decoration: none;
+            text-transform: uppercase;
+            text-align: center;
+            // border: .2rem solid @colors[grey];
+            color: @colors[white];
+            background-color: @colors[primary];
+
+            padding: .6rem .8rem;
+        }
+
+        &:hover {
+            background-color: darken(@colors[primary], 10%);
+        }
+
+        &:active {
+            background-color: darken(@colors[primary], 15%);
+        }
+    }
+}
