@@ -3,6 +3,10 @@
 
     padding: 2rem 3rem;
 
+    @media print {
+        display: none;
+    }
+
     &--home-page {
         background-color: transparent;
         position: relative;
@@ -135,4 +139,8 @@
 
 .header-placeholder {
     height: @fixed-header-height;
+
+    @media print {
+        display: none;
+    }
 }

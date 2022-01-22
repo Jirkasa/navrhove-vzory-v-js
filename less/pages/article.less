@@ -13,6 +13,12 @@
     &__main-side {
         flex: 1;
         overflow-x: hidden;
+
+        @media print {
+            .button-primary {
+                display: none;
+            }
+        }
     }
 
     &__lateral-side {

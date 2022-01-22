@@ -8,6 +8,10 @@
     flex-direction: column;
 
     position: relative;
+
+    @media print {
+        display: none;
+    }
     
     &__content-part {
         flex: 1 0;
@@ -94,11 +98,21 @@
             columns: 1;
         }
     }
+
+    @media print {
+        .button-primary {
+            display: none;
+        }
+    }
 }
 
 .design-patterns-section {
     padding: 6rem 3rem;
     background-color: @colors[secondary];
+
+    @media print {
+        page-break-before: always;
+    }
 
     &__content {
         margin: 0 auto;
@@ -118,6 +132,10 @@
         max-width: @grid-width - (@grid-width/8*2);
 
         margin-bottom: 4rem;
+
+        @media print {
+            color: @colors[grey];
+        }
     }
 
     &__patterns {
@@ -134,6 +152,10 @@
 
 .udemy-course {
     padding: 6rem 3rem;
+
+    @media print {
+        page-break-before: always;
+    }
 
     &__content {
         margin: 0 auto;
@@ -168,6 +190,10 @@
 
             padding-left: 0;
             padding-top: 3rem;
+        }
+
+        @media print {
+            display: none;
         }
     }
 

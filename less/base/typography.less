@@ -39,6 +39,10 @@ body {
 
     &--light {
         color: @colors[white];
+
+        @media print {
+            color: @colors[dark-grey];
+        }
     }
 }
 

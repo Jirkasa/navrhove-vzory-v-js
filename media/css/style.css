@@ -95,6 +95,11 @@ body {
 .section-heading--light {
   color: #fff;
 }
+@media print {
+  .section-heading--light {
+    color: #2d3033;
+  }
+}
 .paragraph {
   font-size: 1.7rem;
   line-height: 1.4;
@@ -320,9 +325,19 @@ code.hljs {
     margin: 1rem auto;
   }
 }
+@media print {
+  .page {
+    box-shadow: none;
+  }
+}
 .header {
   background-color: #313454;
   padding: 2rem 3rem;
+}
+@media print {
+  .header {
+    display: none;
+  }
 }
 .header--home-page {
   background-color: transparent;
@@ -433,12 +448,22 @@ code.hljs {
 .header-placeholder {
   height: 8.1rem;
 }
+@media print {
+  .header-placeholder {
+    display: none;
+  }
+}
 .footer {
   font-size: 1.5rem;
   background-color: #313454;
   color: #808080;
   text-align: center;
   padding: 1.7rem 3rem;
+}
+@media print {
+  .footer {
+    display: none;
+  }
 }
 .footer__author {
   color: #fff;
@@ -595,6 +620,11 @@ code.hljs {
     margin-right: 0;
   }
 }
+@media print {
+  .category-card {
+    flex: 1 0;
+  }
+}
 .category-card__icon {
   height: 10rem;
   margin-bottom: 2rem;
@@ -640,6 +670,11 @@ code.hljs {
 .category-card__design-patterns li:not(:last-child) {
   margin-bottom: 0.7rem;
 }
+@media print {
+  .category-card__design-patterns {
+    padding: 0 0 4rem;
+  }
+}
 .category-card__pattern:link,
 .category-card__pattern:visited {
   display: block;
@@ -663,6 +698,7 @@ code.hljs {
   height: 0.2rem;
   border: none;
   background-color: #e84545;
+  -webkit-print-color-adjust: exact;
 }
 .nav-toggle-button {
   display: none;
@@ -734,6 +770,11 @@ code.hljs {
   flex-direction: column;
   position: relative;
 }
+@media print {
+  .welcome-section {
+    display: none;
+  }
+}
 .welcome-section__content-part {
   flex: 1 0;
   display: flex;
@@ -803,9 +844,19 @@ code.hljs {
     columns: 1;
   }
 }
+@media print {
+  .introduction-section .button-primary {
+    display: none;
+  }
+}
 .design-patterns-section {
   padding: 6rem 3rem;
   background-color: #3a3e64;
+}
+@media print {
+  .design-patterns-section {
+    page-break-before: always;
+  }
 }
 .design-patterns-section__content {
   margin: 0 auto;
@@ -822,6 +873,11 @@ code.hljs {
   max-width: 90rem;
   margin-bottom: 4rem;
 }
+@media print {
+  .design-patterns-section__text {
+    color: #6c7279;
+  }
+}
 .design-patterns-section__patterns {
   display: flex;
   margin-top: 3rem;
@@ -834,6 +890,11 @@ code.hljs {
 }
 .udemy-course {
   padding: 6rem 3rem;
+}
+@media print {
+  .udemy-course {
+    page-break-before: always;
+  }
 }
 .udemy-course__content {
   margin: 0 auto;
@@ -864,6 +925,11 @@ code.hljs {
     flex: 0 0 100%;
     padding-left: 0;
     padding-top: 3rem;
+  }
+}
+@media print {
+  .udemy-course__video-side {
+    display: none;
   }
 }
 .udemy-course__video-link {
@@ -923,6 +989,11 @@ code.hljs {
 .article-page__main-side {
   flex: 1;
   overflow-x: hidden;
+}
+@media print {
+  .article-page__main-side .button-primary {
+    display: none;
+  }
 }
 .article-page__lateral-side {
   flex: 0 0 30rem;

@@ -29,6 +29,10 @@
             margin-right: 0;
         }
     });
+
+    @media print {
+        flex: 1 0;
+    }
     
     &__icon {
         height: 10rem;
@@ -94,6 +98,10 @@
 
         li:not(:last-child) {
             margin-bottom: .7rem;
+        }
+
+        @media print {
+            padding: 0 0 4rem;
         }
     }
 
