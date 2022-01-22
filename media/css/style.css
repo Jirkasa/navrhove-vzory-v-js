@@ -96,6 +96,10 @@ body {
   color: #e84545;
   font-weight: bold;
 }
+::selection {
+  background-color: rgba(232, 69, 69, 0.7);
+  color: #fff;
+}
 .u-mb-tiny {
   margin-bottom: 0.5rem !important;
 }
@@ -248,6 +252,39 @@ code.hljs {
   background: #555;
   color: inherit;
 }
+@keyframes creational-animation {
+  0% {
+    transform: rotate(0);
+  }
+  50% {
+    transform: rotate(-15deg) scale(1.05);
+  }
+  100% {
+    transform: rotate(0);
+  }
+}
+@keyframes structural-animation {
+  0% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(0.5rem, -0.5rem) scale(1.05);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+@keyframes behavioral-animation {
+  0% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: scale(1.05) rotate(-10deg);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
 .page {
   width: 100%;
   max-width: 180rem;
@@ -326,6 +363,9 @@ code.hljs {
   text-transform: uppercase;
   text-decoration: none;
   color: #fff;
+}
+.header__nav-link:hover {
+  color: #e6e6e6;
 }
 .header-placeholder {
   height: 8.1rem;
@@ -470,6 +510,15 @@ code.hljs {
   height: 100%;
   margin: 0 auto;
   fill: #e84545;
+}
+.category-card__icon--creational-anim svg {
+  animation: creational-animation 0.5s 0.4s ease;
+}
+.category-card__icon--structural-anim svg {
+  animation: structural-animation 0.5s 0.4s ease;
+}
+.category-card__icon--behavioral-anim svg {
+  animation: behavioral-animation 0.5s 0.4s ease;
 }
 .category-card__name {
   font-size: 2.5rem;

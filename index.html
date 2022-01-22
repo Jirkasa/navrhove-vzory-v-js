@@ -51,7 +51,7 @@
                 <p class="design-patterns-section__text">Návrhové vzory, které jsou na těchto webových stránkách vysvětleny, můžeme rozdělit do tří různých kategorií. V následujícím seznamu si je můžete prohlédnout.</p>
                 <div class="design-patterns-section__patterns">
                     <div class="category-card">
-                        <div class="category-card__icon">
+                        <div class="category-card__icon" id="creational-patterns-icon">
                             <svg>
                                 <use xlink:href="./media/img/icon-sprite.svg#icon-hammer"></use>
                             </svg>
@@ -67,7 +67,7 @@
                         </ul>
                     </div>
                     <div class="category-card">
-                        <div class="category-card__icon">
+                        <div class="category-card__icon" id="structural-patterns-icon">
                             <svg>
                                 <use xlink:href="./media/img/icon-sprite.svg#icon-power-cord"></use>
                             </svg>
@@ -85,7 +85,7 @@
                         </ul>
                     </div>
                     <div class="category-card">
-                        <div class="category-card__icon">
+                        <div class="category-card__icon" id="behavioral-patterns-icon">
                             <svg>
                                 <use xlink:href="./media/img/icon-sprite.svg#icon-target"></use>
                             </svg>
@@ -136,8 +136,6 @@
     </div>
 
     <script src="./media/js/libraries/particles.min.js"></script>
-    <script>
-        particlesJS.load('particles-js', 'media/assets/particlesjs-config.json');
-    </script>
+    <script type="module" src="./media/js/home.js"></script>
 </body>
 </html>
