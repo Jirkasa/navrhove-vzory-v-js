@@ -23,7 +23,10 @@
 
     &__sticky-content {
         position: sticky;
-        top: 0;
-        padding: 1rem 0;
+        top: @fixed-header-height;
+        margin: 1rem 0;
+
+        background-color: @colors[secondary-dark];
+        border-radius: .3rem;
     }
 }

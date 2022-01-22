@@ -13,7 +13,8 @@
 </head>
 <body>
     <div class="page">
-        <header class="header">
+        <div id="header-placeholder" class="header-placeholder"></div>
+        <header id="particles-js" class="header header--fixed">
             <div class="header__content">
                 <h2 class="header__title"><span>Návrhové vzory</span> v JS</h2>
                 <nav class="header__nav">
@@ -356,6 +357,12 @@ console.log("Po odstranění zdvojeného útoku: " + goblin.toString());</code><
                 </div>
             </div>
         </div>
+        <footer class="footer">
+            Copyright &copy; by <span class="footer__author">Jiří Satora</span>
+        </footer>
     </div>
+
+    <script src="../media/js/libraries/particles.min.js"></script>
+    <script type="module" src="../media/js/chapter.js"></script>
 </body>
 </html>
