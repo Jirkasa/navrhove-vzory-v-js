@@ -1,0 +1,73 @@
+.nav-toggle-button {
+    display: none;
+    width: 3.5rem;
+    height: 3.5rem;
+
+    margin-left: 3rem;
+    
+    border: .2rem solid @colors[white];
+    border-radius: .3rem;
+
+    position: relative;
+
+    cursor: pointer;
+
+    @media (max-width: @navigation-breakpoint) {
+        display: block;
+    }
+
+    &__icon {
+        width: 80%;
+        height: .2rem;
+
+        background-color: @colors[white];
+        border-radius: .2rem;
+
+        transition: all .4s;
+
+        #center-pos-abs();
+
+        &::before, &::after {
+            content: "";
+
+            width: 100%;
+            height: .2rem;
+
+            background-color: @colors[white];
+            border-radius: .2rem;
+
+            transition: all .4s;
+
+            position: absolute;
+            left: 0;
+        }
+        &::before {
+            bottom: .8rem;
+        }
+        &::after {
+            top: .8rem;
+        }
+    }
+
+    &--checked &__icon {
+        background-color: transparent;
+
+        &::before {
+            transform: translateY(.8rem) rotate(45deg);
+        }
+        &::after {
+            transform: translateY(-.8rem) rotate(-45deg);
+        }
+    }
+}
+
+.nav-checkbox {
+    display: none;
+
+    @media (max-width: @navigation-breakpoint) {
+        &:checked + .navigation {
+            box-shadow: 0 1rem 1rem rgba(@colors[black], .2);
+            transform: translateX(-100%);
+        }
+    }
+}

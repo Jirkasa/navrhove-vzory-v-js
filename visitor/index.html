@@ -22,6 +22,14 @@
                         <li><a href="../" class="header__nav-link">hlavní stránka</a></li>
                         <li><a href="../navrhove-principy/" class="header__nav-link">tutoriál</a></li>
                     </ul>
+                    <a href="../" class="header__home-link">hlavní stránka
+                        <svg>
+                            <use xlink:href="../media/img/icon-sprite.svg#icon-home"></use>
+                        </svg>
+                    </a>
+                    <label for="navigation-checkbox" id="navigation-toggle-button" class="nav-toggle-button">
+                        <span class="nav-toggle-button__icon"></span>
+                    </label>
                 </nav>
             </div>
         </header>
@@ -234,6 +242,7 @@ console.log(`${printer.toString()} = ${kalkulator.vysledek}`); // (1+(2+3)) = 6<
                 </div>
                 <div class="article-page__lateral-side">
                     <div class="article-page__sticky-content">
+                        <input type="checkbox" id="navigation-checkbox" class="nav-checkbox">
                         <nav class="navigation">
                             <ul>
                                 <li class="navigation__group">

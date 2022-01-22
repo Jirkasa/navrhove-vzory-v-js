@@ -61,8 +61,18 @@
         font-size: 3.5rem;
 
         color: @colors[white];
+        padding-right: 3rem;
 
         user-select: none;
+
+        @media (max-width: #pxToEm(570)[]) {
+            font-size: 3rem;
+        }
+
+        @media (max-width: #pxToEm(380)[]) {
+            font-size: 2.5rem;
+            line-height: 1;
+        }
 
         span {
             color: lighten(@colors[grey], 30%);
@@ -70,6 +80,8 @@
     }
 
     &__nav {
+        display: flex;
+        align-items: center;
 
         ul {
             display: flex;
@@ -78,6 +90,10 @@
             list-style: none;
 
             height: 100%;
+
+            @media (max-width: #pxToEm(540)[]) {
+                display: none;
+            }
         }
 
         li:not(:last-child) {
@@ -97,6 +113,22 @@
 
         &:hover {
             color: darken(@colors[white], 10%);
+        }
+    }
+
+    &__home-link {
+        font-size: 0;
+        display: none;
+
+        @media (max-width: #pxToEm(540)[]) {
+            display: block;
+        }
+
+        svg {
+            width: 3rem;
+            height: 3rem;
+
+            fill: @colors[white];
         }
     }
 }

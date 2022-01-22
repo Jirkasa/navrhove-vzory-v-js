@@ -1,5 +1,6 @@
 .navigation {
     background-color: @colors[primary];
+    background-color: lighten(@colors[primary], 15%);
     border: .3rem solid @colors[secondary-dark];
     border-radius: .3rem;
     padding: .5rem;
@@ -26,6 +27,17 @@
         &:hover {
             background: lighten(@colors[secondary], 8%);
         }
+    }
+
+    @media (max-width: @navigation-breakpoint) {
+        position: absolute;
+        top: 0;
+        left: 0;
+
+        width: 25rem;
+
+        transition: all .4s;
+        transform: translateX(3rem);
     }
 
     ul {
