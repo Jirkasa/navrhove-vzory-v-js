@@ -113,11 +113,14 @@
             text-decoration: none;
             text-transform: uppercase;
             text-align: center;
-            // border: .2rem solid @colors[grey];
             color: @colors[white];
             background-color: @colors[primary];
 
             padding: .6rem 1rem;
+
+            @media print {
+                color: @colors[grey];
+            }
         }
 
         &:hover {

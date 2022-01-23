@@ -577,6 +577,11 @@ code.hljs {
     transform: translateX(3rem);
   }
 }
+@media print {
+  .navigation {
+    display: none;
+  }
+}
 .navigation ul {
   list-style: none;
 }
@@ -727,6 +732,12 @@ code.hljs {
   color: #fff;
   background-color: #e84545;
   padding: 0.6rem 1rem;
+}
+@media print {
+  .category-card__pattern:link,
+  .category-card__pattern:visited {
+    color: #6c7279;
+  }
 }
 .category-card__pattern:hover {
   background-color: #de1c1c;
