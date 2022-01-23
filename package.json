@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "compile:less": "lessc ./less/main.less ./media/css/style.css",
-    "nodemon:compile:less": "nodemon -e less -x \"npm run compile:less\""
+    "nodemon:compile:less": "nodemon -e less -x \"npm run compile:less\"",
+    "prefix:css": "postcss --use autoprefixer -b 'last 5 versions' media/css/style.css -o media/css/style.prefix.css",
+    "bundle:home": "rollup ./media/js/home.js --file ./media/js/home.min.js --format iife",
+    "bundle:chapter": "rollup ./media/js/chapter.js --file ./media/js/chapter.min.js --format iife"
   },
   "repository": {
     "type": "git",
@@ -18,7 +21,11 @@
   },
   "homepage": "https://github.com/Jirkasa/navrhove-vzory-v-js#readme",
   "devDependencies": {
+    "autoprefixer": "^10.3.7",
     "less": "^4.1.2",
-    "nodemon": "^2.0.15"
+    "nodemon": "^2.0.15",
+    "postcss": "8.3.6",
+    "postcss-cli": "8.3.1",
+    "rollup": "^2.66.0"
   }
 }
